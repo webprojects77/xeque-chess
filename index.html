@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Xeque</title>
+<style>
+:root{--l:#eed9b6;--d:#b58863}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#1d1d22;color:#eee;font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:12px;min-height:100vh}
+h1{font-size:20px;margin:4px 0 10px}
+#bd{display:grid;grid-template-columns:repeat(8,1fr);width:min(94vw,520px);aspect-ratio:1;border-radius:6px;overflow:hidden;user-select:none}
+.s{display:flex;align-items:center;justify-content:center;font-size:min(10.5vw,56px);position:relative;line-height:1}
+.s.l{background:var(--l)}.s.d{background:var(--d)}
+.s.last{background:#cdd26a!important}.s.sel{background:#f6f669!important}.s.chk{background:#e66!important}
+.s.mv::after{content:"";position:absolute;width:30%;height:30%;border-radius:50%;background:rgba(0,0,0,.28)}
+.s.cp::after{content:"";position:absolute;inset:5%;border-radius:50%;border:4px solid rgba(0,0,0,.28)}
+.w{color:#fff;text-shadow:0 0 2px #000,0 0 2px #000,0 0 3px #000}
+.k{color:#111;text-shadow:0 0 1px #fff}
+#st{margin:12px 0 2px;font-size:17px;min-height:24px;text-align:center}
+#in{font-size:13px;opacity:.7;min-height:18px;margin-bottom:10px}
+.r{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+button,select{background:#33333c;color:#eee;border:0;border-radius:8px;padding:10px 14px;font-size:15px}
+button:active{background:#4a4a55}
+</style>
+</head>
+<body>
+<h1>♞ Xeque</h1>
+<div id="bd"></div>
+<div id="st"></div>
+<div id="in"></div>
+<div class="r">
+<button id="nw">Novo jogo</button>
+<button id="un">Desfazer</button>
+<button id="fl">Virar</button>
+</div>
+<div class="r" style="margin-top:8px">
+<select id="lv"><option value="0">Iniciante</option><option value="1">Fácil</option><option value="2">Médio</option><option value="3" selected>Difícil</option><option value="4">Máximo</option></select>
+<select id="sd"><option value="0">Jogo de brancas</option><option value="1">Jogo de pretas</option></select>
+</div>
+<script src="engine.js"></script>
+<script>
+const X=Xeque,LV=[{ms:200,d:1,t:200},{ms:300,d:2,t:90},{ms:500,d:4,t:25},{ms:1500,d:64,t:0},{ms:6000,d:64,t:0}];
+const G=['','♟','♞','♝','♜','♛','♚'];
+const $=id=>document.getElementById(id);
+let moves=[],human=0,flip=false,sel=-1,busy=false,over='',last=[-1,-1],w=null;
+function mk(){try{w=new Worker('engine.js');w.onmessage=e=>{if(e.data.info)info(e.data.info);else if(e.data.best)apply(e.data.best);};w.onerror=()=>{w=null;};}catch(e){w=null;}}
+mk();
+
+function sync(){X.setup(X.START,moves);}
+function info(i){$('in').textContent='profundidade '+i.d+' · '+(i.v/100).toFixed(2)+' · '+(i.nodes/1000|0)+'k nós';}
+function render(){
+  const bd=$('bd'),lg=X.legal().filter(m=>(m&127)==sel),tg={};
+  for(const m of lg)tg[m>>7&127]=1;
+  const kc=X.inCheck()?kingSq():-1;
+  let h='';
+  for(let i=0;i<8;i++)for(let j=0;j<8;j++){
+    const r=flip?i:7-i,f=flip?7-j:j,sq=r*16+f,p=X.at(f,r);
+    let c='s '+((r+f)%2?'l':'d');
+    if(sq==last[0]||sq==last[1])c+=' last';
+    if(sq==sel)c+=' sel';
+    if(sq==kc)c+=' chk';
+    if(tg[sq])c+=p?' cp':' mv';
+    h+='<div class="'+c+'" data-q="'+sq+'">'+(p?'<span class="'+((p>>3)?'k':'w')+'">'+G[p&7]+'\uFE0E</span>':'')+'</div>';
+  }
+  bd.innerHTML=h;
+  let s;
+  if(over)s=over;else if(busy)s='Pensando…';else s=X.side()==human?'Sua vez':'Vez do computador';
+  $('st').textContent=s;
+}
+function kingSq(){for(let r=0;r<8;r++)for(let f=0;f<8;f++){const p=X.at(f,r);if((p&7)==6&&(p>>3)==X.side())return r*16+f;}return -1;}
+function check(){
+  const s=X.status();
+  if(s=='mate')over='Xeque-mate! '+(X.side()==human?'O computador ganhou.':'Você ganhou!');
+  else if(s=='stalemate')over='Empate por afogamento.';
+  else if(s)over='Empate.';
+  else over='';
+}
+function apply(u){
+  moves.push(u);sync();
+  last=[(u.charCodeAt(1)-49)*16+u.charCodeAt(0)-97,(u.charCodeAt(3)-49)*16+u.charCodeAt(2)-97];
+  busy=false;sel=-1;check();render();
+}
+function engineMove(){
+  if(over)return render();
+  busy=true;render();
+  const L=LV[+$('lv').value],job={fen:X.START,moves:moves.slice(),ms:L.ms,depth:L.d,temp:L.t};
+  if(w)w.postMessage(job);
+  else setTimeout(()=>{sync();const m=X.think(L.ms,L.d,L.t,info);apply(X.uci(m));},30);
+}
+$('bd').onclick=e=>{
+  const el=e.target.closest('.s');if(!el||busy||over||X.side()!=human)return;
+  const sq=+el.dataset.q,mv=X.legal().filter(m=>(m&127)==sel&&(m>>7&127)==sq);
+  if(mv.length){
+    const m=mv.find(x=>(x>>17&7)==5)||mv[0];
+    const u=X.uci(m);moves.push(u);sync();
+    last=[m&127,m>>7&127];sel=-1;check();render();
+    if(!over)engineMove();
+    return;
+  }
+  const p=X.at(sq&7,sq>>4);
+  sel=p&&(p>>3)==human?sq:-1;render();
+};
+function nw(){
+  moves=[];human=+$('sd').value;flip=human==1;sel=-1;over='';busy=false;last=[-1,-1];
+  X.reset();if(w){w.terminate();mk();}
+  sync();$('in').textContent='';render();
+  if(human==1)engineMove();
+}
+$('nw').onclick=nw;
+$('fl').onclick=()=>{flip=!flip;render();};
+$('un').onclick=()=>{
+  if(busy)return;
+  const k=X.side()==human?2:1;
+  if(moves.length<k)return;
+  moves.length-=k;sync();over='';sel=-1;last=[-1,-1];render();
+};
+nw();
+</script>
+</body>
+</html>
