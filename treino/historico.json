@@ -1,0 +1,16 @@
+[
+ {
+  "quando": "2026-11-07T23:16:51.630Z",
+  "geracao": 0,
+  "posicoes": 13098,
+  "erroAntes": 0.00995,
+  "erroDepois": 0.00886,
+  "partidas": {
+   "v": 44,
+   "e": 27,
+   "d": 49,
+   "score": 0.4791666666666667
+  },
+  "aceito": false
+ }
+]
