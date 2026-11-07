@@ -120,7 +120,7 @@ function sync(){X.setup(X.START,moves);}
 function kingSq(){for(let r=0;r<8;r++)for(let f=0;f<8;f++){const p=X.at(f,r);if((p&7)==6&&(p>>3)==X.side())return r*16+f;}return -1;}
 function render(){
   const lg=X.legal().filter(m=>(m&127)==sel),tg={};
-  for(const m of lg)tg[m>>7&127]=1;
+  for(const m of lg){tg[m>>7&127]=1;if((m>>14&7)==2){const t=m>>7&127;tg[t>(m&127)?t+1:t-2]=1;}}
   const kc=X.inCheck()?kingSq():-1;
   let h='';
   for(let i=0;i<8;i++)for(let j=0;j<8;j++){
@@ -187,7 +187,15 @@ function engineMove(){
 }
 $('bd').onclick=e=>{
   const el=e.target.closest('.s');if(!el||busy||over||X.side()!=human)return;
-  const sq=+el.dataset.q,mv=X.legal().filter(m=>(m&127)==sel&&(m>>7&127)==sq);
+  const sq=+el.dataset.q;
+  let mv=X.legal().filter(m=>(m&127)==sel&&(m>>7&127)==sq);
+  if(!mv.length&&sel>=0){
+    const sp=X.at(sel&7,sel>>4),tp=X.at(sq&7,sq>>4);
+    if(sp&&tp&&(sp>>3)==human&&(tp>>3)==human&&(((sp&7)==6&&(tp&7)==4)||((sp&7)==4&&(tp&7)==6))){
+      const k=(sp&7)==6?sel:sq,r=(sp&7)==6?sq:sel,dest=r>k?k+2:k-2;
+      mv=X.legal().filter(m=>(m&127)==k&&(m>>7&127)==dest&&(m>>14&7)==2);
+    }
+  }
   if(mv.length){
     const m=mv.find(x=>(x>>17&7)==5)||mv[0];
     moves.push(X.uci(m));sync();
