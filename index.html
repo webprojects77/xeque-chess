@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Xeque</title>
 <style>
-:root{--l:#eed9b6;--d:#b58863}
+:root{--l:#eed9b6;--d:#b58863;--bs:min(94vw,520px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:#1d1d22;color:#eee;font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:12px;min-height:100vh}
 h1{font-size:20px;margin:4px 0 10px}
-#bd{display:grid;grid-template-columns:repeat(8,1fr);width:min(94vw,520px);aspect-ratio:1;border-radius:6px;overflow:hidden;user-select:none}
-.s{display:flex;align-items:center;justify-content:center;font-size:min(10.5vw,56px);position:relative;line-height:1}
+#bd{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:var(--bs);height:var(--bs);border-radius:6px;overflow:hidden;user-select:none}
+.s{display:flex;align-items:center;justify-content:center;font-size:calc(var(--bs)/8*.86);position:relative;line-height:1;min-width:0;min-height:0;overflow:hidden}
 .s.l{background:var(--l)}.s.d{background:var(--d)}
 .s.last{background:#cdd26a!important}.s.sel{background:#f6f669!important}.s.chk{background:#e66!important}
 .s.mv::after{content:"";position:absolute;width:30%;height:30%;border-radius:50%;background:rgba(0,0,0,.28)}
@@ -18,8 +18,8 @@ h1{font-size:20px;margin:4px 0 10px}
 .w{color:#fff;text-shadow:0 0 2px #000,0 0 2px #000,0 0 3px #000}
 .k{color:#111;text-shadow:0 0 1px #fff}
 #st{margin:12px 0 2px;font-size:17px;min-height:24px;text-align:center}
-#in{font-size:13px;opacity:.7;min-height:18px;margin-bottom:10px}
-.r{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#in{font-size:13px;opacity:.7;min-height:18px;margin-bottom:10px;text-align:center}
+.r{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
 button,select{background:#33333c;color:#eee;border:0;border-radius:8px;padding:10px 14px;font-size:15px}
 button:active{background:#4a4a55}
 </style>
@@ -34,23 +34,54 @@ button:active{background:#4a4a55}
 <button id="un">Desfazer</button>
 <button id="fl">Virar</button>
 </div>
-<div class="r" style="margin-top:8px">
-<select id="lv"><option value="0">Iniciante</option><option value="1">Fácil</option><option value="2">Médio</option><option value="3" selected>Difícil</option><option value="4">Máximo</option></select>
+<div class="r">
+<select id="en"><option value="sf">Stockfish</option><option value="xq">Xeque</option></select>
+<select id="lv"><option value="0">Iniciante</option><option value="1">Fácil</option><option value="2">Médio</option><option value="3">Difícil</option><option value="4">Mestre</option><option value="5" selected>Máximo</option></select>
 <select id="sd"><option value="0">Jogo de brancas</option><option value="1">Jogo de pretas</option></select>
 </div>
 <script src="engine.js"></script>
 <script>
-const X=Xeque,LV=[{ms:200,d:1,t:200},{ms:300,d:2,t:90},{ms:500,d:4,t:25},{ms:1500,d:64,t:0},{ms:6000,d:64,t:0}];
+const X=Xeque;
+const XQ=[{ms:200,d:1,t:200},{ms:300,d:2,t:90},{ms:500,d:4,t:25},{ms:1500,d:64,t:0},{ms:3000,d:64,t:0},{ms:8000,d:64,t:0}];
+const SF=[{elo:1320,ms:150},{elo:1600,ms:250},{elo:1900,ms:400},{elo:2300,ms:700},{elo:2800,ms:1500},{elo:0,ms:4000}];
 const G=['','♟','♞','♝','♜','♛','♚'];
 const $=id=>document.getElementById(id);
-let moves=[],human=0,flip=false,sel=-1,busy=false,over='',last=[-1,-1],w=null;
+let moves=[],human=0,flip=false,sel=-1,busy=false,over='',last=[-1,-1],w=null,sf=null,sfOk=null,sfCb=null;
+
 function mk(){try{w=new Worker('engine.js');w.onmessage=e=>{if(e.data.info)info(e.data.info);else if(e.data.best)apply(e.data.best);};w.onerror=()=>{w=null;};}catch(e){w=null;}}
 mk();
 
+function sfStart(){
+  if(sf)return sfOk;
+  sfOk=new Promise((res,rej)=>{
+    try{
+      sf=new Worker('stockfish/stockfish-19-lite-single.js');
+      sf.onerror=()=>{sf=null;rej();};
+      sf.onmessage=e=>{
+        const l=typeof e.data=='string'?e.data:'';
+        if(l=='uciok')sf.postMessage('isready');
+        else if(l=='readyok'&&res){res();res=null;}
+        else if(l.startsWith('info')&&busy){
+          const d=/ depth (\d+)/.exec(l),c=/ score (cp|mate) (-?\d+)/.exec(l),n=/ nodes (\d+)/.exec(l);
+          if(d&&c)info({d:+d[1],v:c[1]=='mate'?(+c[2]>0?1:-1)*(100000-Math.abs(+c[2])):+c[2],nodes:n?+n[1]:0});
+        }
+        else if(l.startsWith('bestmove')&&sfCb){const cb=sfCb;sfCb=null;cb(l.split(' ')[1]);}
+      };
+      sf.postMessage('uci');
+    }catch(x){sf=null;rej();}
+  });
+  return sfOk;
+}
+function sfStop(){if(sf){sf.terminate();sf=null;}sfCb=null;}
+
 function sync(){X.setup(X.START,moves);}
-function info(i){$('in').textContent='profundidade '+i.d+' · '+(i.v/100).toFixed(2)+' · '+(i.nodes/1000|0)+'k nós';}
+function info(i){
+  const v=Math.abs(i.v)>=90000?'mate':(i.v/100).toFixed(2);
+  $('in').textContent='profundidade '+i.d+' · '+v+' · '+(i.nodes/1000|0)+'k nós';
+}
+function kingSq(){for(let r=0;r<8;r++)for(let f=0;f<8;f++){const p=X.at(f,r);if((p&7)==6&&(p>>3)==X.side())return r*16+f;}return -1;}
 function render(){
-  const bd=$('bd'),lg=X.legal().filter(m=>(m&127)==sel),tg={};
+  const lg=X.legal().filter(m=>(m&127)==sel),tg={};
   for(const m of lg)tg[m>>7&127]=1;
   const kc=X.inCheck()?kingSq():-1;
   let h='';
@@ -63,12 +94,9 @@ function render(){
     if(tg[sq])c+=p?' cp':' mv';
     h+='<div class="'+c+'" data-q="'+sq+'">'+(p?'<span class="'+((p>>3)?'k':'w')+'">'+G[p&7]+'\uFE0E</span>':'')+'</div>';
   }
-  bd.innerHTML=h;
-  let s;
-  if(over)s=over;else if(busy)s='Pensando…';else s=X.side()==human?'Sua vez':'Vez do computador';
-  $('st').textContent=s;
+  $('bd').innerHTML=h;
+  $('st').textContent=over||(busy?'Pensando…':X.side()==human?'Sua vez':'Vez do computador');
 }
-function kingSq(){for(let r=0;r<8;r++)for(let f=0;f<8;f++){const p=X.at(f,r);if((p&7)==6&&(p>>3)==X.side())return r*16+f;}return -1;}
 function check(){
   const s=X.status();
   if(s=='mate')over='Xeque-mate! '+(X.side()==human?'O computador ganhou.':'Você ganhou!');
@@ -77,23 +105,36 @@ function check(){
   else over='';
 }
 function apply(u){
+  if(!busy)return;
   moves.push(u);sync();
   last=[(u.charCodeAt(1)-49)*16+u.charCodeAt(0)-97,(u.charCodeAt(3)-49)*16+u.charCodeAt(2)-97];
   busy=false;sel=-1;check();render();
 }
+function xqMove(){
+  const L=XQ[+$('lv').value];
+  if(w)w.postMessage({fen:X.START,moves:moves.slice(),ms:L.ms,depth:L.d,temp:L.t});
+  else setTimeout(()=>{sync();const m=X.think(L.ms,L.d,L.t,info);apply(X.uci(m));},30);
+}
 function engineMove(){
   if(over)return render();
   busy=true;render();
-  const L=LV[+$('lv').value],job={fen:X.START,moves:moves.slice(),ms:L.ms,depth:L.d,temp:L.t};
-  if(w)w.postMessage(job);
-  else setTimeout(()=>{sync();const m=X.think(L.ms,L.d,L.t,info);apply(X.uci(m));},30);
+  if($('en').value=='sf'){
+    const L=SF[+$('lv').value];
+    if(!sf)$('in').textContent='Carregando Stockfish…';
+    sfStart().then(()=>{
+      sf.postMessage('setoption name UCI_LimitStrength value '+(L.elo?'true':'false'));
+      if(L.elo)sf.postMessage('setoption name UCI_Elo value '+L.elo);
+      sf.postMessage('position startpos'+(moves.length?' moves '+moves.join(' '):''));
+      sfCb=apply;sf.postMessage('go movetime '+L.ms);
+    }).catch(()=>{$('en').value='xq';$('in').textContent='Stockfish não carregou, usando o Xeque.';xqMove();});
+  }else xqMove();
 }
 $('bd').onclick=e=>{
   const el=e.target.closest('.s');if(!el||busy||over||X.side()!=human)return;
   const sq=+el.dataset.q,mv=X.legal().filter(m=>(m&127)==sel&&(m>>7&127)==sq);
   if(mv.length){
     const m=mv.find(x=>(x>>17&7)==5)||mv[0];
-    const u=X.uci(m);moves.push(u);sync();
+    moves.push(X.uci(m));sync();
     last=[m&127,m>>7&127];sel=-1;check();render();
     if(!over)engineMove();
     return;
@@ -103,7 +144,7 @@ $('bd').onclick=e=>{
 };
 function nw(){
   moves=[];human=+$('sd').value;flip=human==1;sel=-1;over='';busy=false;last=[-1,-1];
-  X.reset();if(w){w.terminate();mk();}
+  X.reset();if(w){w.terminate();mk();}sfStop();
   sync();$('in').textContent='';render();
   if(human==1)engineMove();
 }
