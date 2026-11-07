@@ -34,14 +34,24 @@ button:active{background:#4a4a55}
 <button id="fl">Virar</button>
 <select id="sd"><option value="0">Jogo de brancas</option><option value="1">Jogo de pretas</option></select>
 </div>
-<script src="engine.js"></script>
+<script src="engine.js?v=5"></script>
 <script>
-const X=Xeque,T1=3500,T2=1500;
+const X=Xeque,T1=3000,T2=1200,T3=1500,TH=60;
 const G=['','♟','♞','♝','♜','♛','♚'];
 const $=id=>document.getElementById(id);
-let moves=[],human=0,flip=false,sel=-1,busy=false,over='',last=[-1,-1],w=null,sf=null,sfOk=null,sfCb=null,sfInfo=null,jid=0;
+let moves=[],human=0,flip=false,sel=-1,busy=false,over='',last=[-1,-1],w=null,sf=null,sfOk=null,sfCb=null,sfInfo=null,sfMulti=null,jid=0,MEM={};
+try{MEM=JSON.parse(localStorage.getItem('xeque_mem')||'{}');}catch(e){MEM={};}
+function learn(k,g,b){
+  const e=MEM[k]||{g:'',b:[]};
+  if(g)e.g=g;
+  if(b&&e.b.indexOf(b)<0)e.b.push(b);
+  MEM[k]=e;
+  const ks=Object.keys(MEM);if(ks.length>20000)delete MEM[ks[0]];
+  try{localStorage.setItem('xeque_mem',JSON.stringify(MEM));}catch(x){}
+}
+const lessons=()=>Object.keys(MEM).length;
 
-function mk(){try{w=new Worker('engine.js');w.onerror=()=>{w=null;};}catch(e){w=null;}}
+function mk(){try{w=new Worker('engine.js?v=5');w.onerror=()=>{w=null;};}catch(e){w=null;}}
 mk();
 
 function fmt(i){return 'prof. '+i.d+' · '+(Math.abs(i.v)>=90000?'mate':(i.v/100).toFixed(2));}
@@ -55,9 +65,13 @@ function sfStart(){
         const l=typeof e.data=='string'?e.data:'';
         if(l=='uciok')sf.postMessage('isready');
         else if(l=='readyok'&&res){sf.postMessage('setoption name Hash value 32');res();res=null;}
-        else if(l.startsWith('info')&&sfInfo){
-          const d=/ depth (\d+)/.exec(l),c=/ score (cp|mate) (-?\d+)/.exec(l);
-          if(d&&c)sfInfo({d:+d[1],v:c[1]=='mate'?(+c[2]>0?1:-1)*(100000-Math.abs(+c[2])):+c[2]});
+        else if(l.startsWith('info')&&l.indexOf('bound')<0){
+          const d=/ depth (\d+)/.exec(l),c=/ score (cp|mate) (-?\d+)/.exec(l),p=/ pv (\S+)/.exec(l);
+          if(d&&c){
+            const v=c[1]=='mate'?(+c[2]>0?1:-1)*(100000-Math.abs(+c[2])):+c[2];
+            if(sfInfo)sfInfo({d:+d[1],v});
+            if(sfMulti&&p)sfMulti[p[1]]=v;
+          }
         }
         else if(l.startsWith('bestmove')&&sfCb){const cb=sfCb;sfCb=null;cb(l.split(' ')[1]);}
       };
@@ -66,13 +80,38 @@ function sfStart(){
   });
   return sfOk;
 }
-function sfStop(){if(sf){sf.terminate();sf=null;}sfCb=null;sfInfo=null;}
-function sfRun(mv,ms,only,cb,fail){
+function sfStop(){if(sf){sf.terminate();sf=null;}sfCb=null;sfInfo=null;sfMulti=null;}
+function pos(mv){return 'position startpos'+(mv.length?' moves '+mv.join(' '):'');}
+function sfRun(mv,ms,cb,fail){
   sfStart().then(()=>{
-    sfInfo=i=>{$('i1').textContent='Stockfish: '+fmt(i);};
-    sf.postMessage('position startpos'+(mv.length?' moves '+mv.join(' '):''));
-    sfCb=cb;sf.postMessage('go movetime '+ms+(only?' searchmoves '+only.join(' '):''));
+    sfMulti=null;
+    sfInfo=i=>{$('i2').textContent='Stockfish (supervisor): '+fmt(i);};
+    sf.postMessage(pos(mv));
+    sfCb=cb;sf.postMessage('go movetime '+ms);
   }).catch(()=>{if(fail)fail();else cb(null);});
+}
+function sfCompare(mv,list,cb){
+  sfStart().then(()=>{
+    const sc={};sfMulti=sc;sfInfo=null;
+    sf.postMessage('setoption name MultiPV value '+list.length);
+    sf.postMessage(pos(mv));
+    sfCb=()=>{sfMulti=null;sf.postMessage('setoption name MultiPV value 1');cb(sc);};
+    sf.postMessage('go movetime '+T2+' searchmoves '+list.join(' '));
+  }).catch(()=>cb(null));
+}
+function xqRun(job,mv,ms,ex,cb){
+  if(w){
+    w.onmessage=e=>{
+      if(job!=jid)return;
+      if(e.data.info)$('i1').textContent='Xeque (principal): '+fmt(e.data.info);
+      else if(e.data.best)cb(e.data.best);
+    };
+    w.postMessage({fen:X.START,moves:mv,ms:ms,depth:64,temp:0,ex:ex});
+  }else setTimeout(()=>{
+    if(job!=jid)return;
+    sync();const m=X.think(ms,64,0,i=>{$('i1').textContent='Xeque (principal): '+fmt(i);},ex);
+    cb(X.uci(m));
+  },50);
 }
 
 function sync(){X.setup(X.START,moves);}
@@ -108,27 +147,37 @@ function apply(u){
   busy=false;sel=-1;check();render();
 }
 function think(){
-  const job=++jid,mv=moves.slice();let sm=null,xm=null,sd=false,xd=false;
-  $('i1').textContent='Stockfish: pensando…';$('i2').textContent='Xeque: pensando…';$('i3').textContent='';
+  const job=++jid,mv=moves.slice(),key=X.key(),mem=MEM[key];
+  $('i1').textContent='Xeque (principal): pensando…';$('i2').textContent='Stockfish (supervisor): pensando…';$('i3').textContent='';
+  const play=(u,t)=>{if(job!=jid)return;$('i3').textContent=t+' · lições guardadas: '+lessons();apply(u);};
+  if(mem&&mem.g&&X.parse(mem.g)){play(mem.g,'Xeque lembrou de uma lição e jogou direto.');return;}
+  const ex=mem?mem.b.slice():[];
+  let xm=null,sm=null,xd=false,sd=false;
   const fin=()=>{
-    if(job!=jid||!sd||!xd)return;
-    if(!sm||!xm||sm==xm){$('i3').textContent=sm&&xm?'Os dois cérebros concordam.':'Um cérebro não respondeu, o outro decidiu.';apply(sm||xm);return;}
-    $('i3').textContent='Divergiram ('+sm+' x '+xm+'): o Stockfish desempata.';
-    sfRun(mv,T2,[sm,xm],b=>{if(job==jid)apply(b||sm);});
-  };
-  if(w){
-    w.onmessage=e=>{
+    if(job!=jid||!xd||!sd)return;
+    if(!sm){play(xm,'Stockfish indisponível: o Xeque jogou sozinho.');return;}
+    if(xm==sm){learn(key,xm);play(xm,'Stockfish aprovou o lance do Xeque.');return;}
+    $('i3').textContent='Stockfish está conferindo o lance do Xeque…';
+    sfCompare(mv,[sm,xm],sc=>{
       if(job!=jid)return;
-      if(e.data.info)$('i2').textContent='Xeque: '+fmt(e.data.info);
-      else if(e.data.best){xm=e.data.best;xd=true;fin();}
-    };
-    w.postMessage({fen:X.START,moves:mv,ms:T1,depth:64,temp:0});
-  }else setTimeout(()=>{
-    if(job!=jid)return;
-    sync();const m=X.think(T1,64,0,i=>{$('i2').textContent='Xeque: '+fmt(i);});
-    xm=X.uci(m);xd=true;fin();
-  },50);
-  sfRun(mv,T1,null,b=>{sm=b;sd=true;fin();},()=>{sm=null;sd=true;fin();});
+      if(!sc||sc[sm]==null||sc[xm]==null){play(xm,'Xeque jogou (conferência indisponível).');return;}
+      const loss=sc[sm]-sc[xm];
+      if(loss<=TH){learn(key,xm);play(xm,'Stockfish aprovou o lance do Xeque.');return;}
+      learn(key,sm,xm);
+      $('i3').textContent='Stockfish avisou: '+xm+' perde '+(loss/100).toFixed(1)+'. Xeque está refazendo…';
+      xqRun(job,mv,T3,ex.concat([xm]),x2=>{
+        if(job!=jid)return;
+        if(x2==sm){learn(key,sm);play(sm,'Xeque se corrigiu e chegou no lance do Stockfish.');return;}
+        sfCompare(mv,[sm,x2],s2=>{
+          if(job!=jid)return;
+          if(s2&&s2[sm]!=null&&s2[x2]!=null&&s2[sm]-s2[x2]<=TH){learn(key,x2);play(x2,'Xeque se corrigiu sozinho.');return;}
+          learn(key,sm,x2);play(sm,'Stockfish insistiu e jogou '+sm+'.');
+        });
+      });
+    });
+  };
+  xqRun(job,mv,T1,ex,m=>{xm=m;xd=true;fin();});
+  sfRun(mv,T1,b=>{sm=b;sd=true;fin();},()=>{sm=null;sd=true;fin();});
 }
 function engineMove(){
   if(over)return render();
@@ -150,7 +199,7 @@ $('bd').onclick=e=>{
 function nw(){
   jid++;moves=[];human=+$('sd').value;flip=human==1;sel=-1;over='';busy=false;last=[-1,-1];
   X.reset();if(w){w.terminate();mk();}sfStop();
-  sync();$('i1').textContent='';$('i2').textContent='';$('i3').textContent='';render();
+  sync();$('i1').textContent='';$('i2').textContent='';$('i3').textContent='Lições guardadas: '+lessons();render();
   if(human==1)engineMove();
 }
 $('nw').onclick=nw;

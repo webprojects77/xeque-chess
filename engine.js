@@ -6,7 +6,7 @@ const b=new Int8Array(128),CM=new Int8Array(128).fill(15);
 CM[0]=13;CM[7]=14;CM[4]=12;CM[112]=7;CM[119]=11;CM[116]=3;
 const L=2080,Z=new Int32Array(2*L);
 (function(){let s=0x9E3779B9|0;for(let i=0;i<Z.length;i++){s^=s<<13;s^=s>>>17;s^=s<<5;Z[i]=s;}})();
-let side=0,castle=0,ep=-1,half=0,n=0,hash=0,hash2=0,nodes=0,stop=false,tEnd=0,rootBest=0;
+let side=0,castle=0,ep=-1,half=0,n=0,hash=0,hash2=0,nodes=0,stop=false,tEnd=0,rootBest=0,rootEx=[];
 const kg=[0,0];
 const sM=new Int32Array(4096),sC=new Int8Array(4096),sCa=new Int8Array(4096),sE=new Int16Array(4096),sH=new Int16Array(4096),sK=new Int32Array(4096),sK2=new Int32Array(4096);
 const MV=new Int32Array(130*256),SC=new Int32Array(130*256),K1=new Int32Array(130),K2=new Int32Array(130),Hs=new Int32Array(32768);
@@ -274,6 +274,7 @@ function ab(al,be,d,pl,nl){
       if(d<=3&&mc>=4+d*d)continue;
       if(d<=2&&ev+130*d<=al)continue;
     }
+    if(!pl&&rootEx.length&&rootEx.indexOf(m)>=0)continue;
     make(m);
     if(attacked(kg[side^1],side)){unmake();continue;}
     mc++;
@@ -302,7 +303,7 @@ function ab(al,be,d,pl,nl){
   if(!mc)return inC?pl-MATE:0;
   const fl=best>=be?2:best>al0?3:1;
   let sv=best;if(sv>MATE-200)sv+=pl;else if(sv<200-MATE)sv-=pl;
-  if(!tF[ix]||tA[ix]!=hash2||d>=tD[ix]-2||fl==3){tA[ix]=hash2;tM[ix]=bm;tS[ix]=sv;tD[ix]=d;tF[ix]=fl;}
+  if((pl||!rootEx.length)&&(!tF[ix]||tA[ix]!=hash2||d>=tD[ix]-2||fl==3)){tA[ix]=hash2;tM[ix]=bm;tS[ix]=sv;tD[ix]=d;tF[ix]=fl;}
   return best;
 }
 
@@ -337,9 +338,12 @@ function perft(d,p){
   for(let i=o;i<k;i++){const m=MV[i];make(m);if(!attacked(kg[side^1],side))c+=d==1?1:perft(d-1,p+1);unmake();}
   return c;
 }
-function think(ms,maxD,temp,cb){
+function think(ms,maxD,temp,cb,ex){
   nodes=0;stop=false;const t0=Date.now();tEnd=t0+ms;rootBest=0;K1.fill(0);K2.fill(0);
-  const mv=legal();if(!mv.length)return 0;
+  const all=legal();if(!all.length)return 0;
+  rootEx=(ex||[]).map(parse).filter(Boolean);
+  let mv=all.filter(m=>rootEx.indexOf(m)<0);
+  if(!mv.length){rootEx=[];mv=all;}
   rootBest=mv[0];if(mv.length==1)return mv[0];
   if(temp>0){
     tEnd=t0+1e9;
@@ -360,7 +364,7 @@ function think(ms,maxD,temp,cb){
   return bm;
 }
 
-G.Xeque={START,load,legal,make,unmake,uci,parse,setup,reset,status,perft,think,inCheck,
+G.Xeque={START,load,legal,make,unmake,uci,parse,setup,reset,status,perft,think,inCheck,key:()=>hash+'_'+hash2,
   at:(f,r)=>b[r*16+f],side:()=>side};
 if(typeof module!=='undefined')module.exports=G.Xeque;
 if(typeof WorkerGlobalScope!=='undefined'&&typeof self!=='undefined'&&self instanceof WorkerGlobalScope){
@@ -368,7 +372,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&typeof self!=='undefined'&&self insta
     const d=e.data;
     if(d.reset){reset();return;}
     setup(d.fen,d.moves);
-    const m=think(d.ms,d.depth,d.temp,i=>postMessage({info:i}));
+    const m=think(d.ms,d.depth,d.temp,i=>postMessage({info:i}),d.ex);
     postMessage({best:uci(m)});
   };
 }
