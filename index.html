@@ -18,7 +18,7 @@ h1{font-size:20px;margin:4px 0 10px}
 .w{color:#fff;text-shadow:0 0 2px #000,0 0 2px #000,0 0 3px #000}
 .k{color:#111;text-shadow:0 0 1px #fff}
 #st{margin:12px 0 2px;font-size:17px;min-height:24px;text-align:center}
-#in{font-size:13px;opacity:.7;min-height:18px;margin-bottom:10px;text-align:center}
+#in{font-size:13px;opacity:.75;min-height:54px;margin-bottom:6px;text-align:center;line-height:1.4}
 .r{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
 button,select{background:#33333c;color:#eee;border:0;border-radius:8px;padding:10px 14px;font-size:15px}
 button:active{background:#4a4a55}
@@ -28,29 +28,23 @@ button:active{background:#4a4a55}
 <h1>♞ Xeque</h1>
 <div id="bd"></div>
 <div id="st"></div>
-<div id="in"></div>
+<div id="in"><div id="i1"></div><div id="i2"></div><div id="i3"></div></div>
 <div class="r">
 <button id="nw">Novo jogo</button>
-<button id="un">Desfazer</button>
 <button id="fl">Virar</button>
-</div>
-<div class="r">
-<select id="en"><option value="sf">Stockfish</option><option value="xq">Xeque</option></select>
-<select id="lv"><option value="0">Iniciante</option><option value="1">Fácil</option><option value="2">Médio</option><option value="3">Difícil</option><option value="4">Mestre</option><option value="5" selected>Máximo</option></select>
 <select id="sd"><option value="0">Jogo de brancas</option><option value="1">Jogo de pretas</option></select>
 </div>
 <script src="engine.js"></script>
 <script>
-const X=Xeque;
-const XQ=[{ms:200,d:1,t:200},{ms:300,d:2,t:90},{ms:500,d:4,t:25},{ms:1500,d:64,t:0},{ms:3000,d:64,t:0},{ms:8000,d:64,t:0}];
-const SF=[{elo:1320,ms:150},{elo:1600,ms:250},{elo:1900,ms:400},{elo:2300,ms:700},{elo:2800,ms:1500},{elo:0,ms:4000}];
+const X=Xeque,T1=3500,T2=1500;
 const G=['','♟','♞','♝','♜','♛','♚'];
 const $=id=>document.getElementById(id);
-let moves=[],human=0,flip=false,sel=-1,busy=false,over='',last=[-1,-1],w=null,sf=null,sfOk=null,sfCb=null;
+let moves=[],human=0,flip=false,sel=-1,busy=false,over='',last=[-1,-1],w=null,sf=null,sfOk=null,sfCb=null,sfInfo=null,jid=0;
 
-function mk(){try{w=new Worker('engine.js');w.onmessage=e=>{if(e.data.info)info(e.data.info);else if(e.data.best)apply(e.data.best);};w.onerror=()=>{w=null;};}catch(e){w=null;}}
+function mk(){try{w=new Worker('engine.js');w.onerror=()=>{w=null;};}catch(e){w=null;}}
 mk();
 
+function fmt(i){return 'prof. '+i.d+' · '+(Math.abs(i.v)>=90000?'mate':(i.v/100).toFixed(2));}
 function sfStart(){
   if(sf)return sfOk;
   sfOk=new Promise((res,rej)=>{
@@ -60,10 +54,10 @@ function sfStart(){
       sf.onmessage=e=>{
         const l=typeof e.data=='string'?e.data:'';
         if(l=='uciok')sf.postMessage('isready');
-        else if(l=='readyok'&&res){res();res=null;}
-        else if(l.startsWith('info')&&busy){
-          const d=/ depth (\d+)/.exec(l),c=/ score (cp|mate) (-?\d+)/.exec(l),n=/ nodes (\d+)/.exec(l);
-          if(d&&c)info({d:+d[1],v:c[1]=='mate'?(+c[2]>0?1:-1)*(100000-Math.abs(+c[2])):+c[2],nodes:n?+n[1]:0});
+        else if(l=='readyok'&&res){sf.postMessage('setoption name Hash value 32');res();res=null;}
+        else if(l.startsWith('info')&&sfInfo){
+          const d=/ depth (\d+)/.exec(l),c=/ score (cp|mate) (-?\d+)/.exec(l);
+          if(d&&c)sfInfo({d:+d[1],v:c[1]=='mate'?(+c[2]>0?1:-1)*(100000-Math.abs(+c[2])):+c[2]});
         }
         else if(l.startsWith('bestmove')&&sfCb){const cb=sfCb;sfCb=null;cb(l.split(' ')[1]);}
       };
@@ -72,13 +66,16 @@ function sfStart(){
   });
   return sfOk;
 }
-function sfStop(){if(sf){sf.terminate();sf=null;}sfCb=null;}
+function sfStop(){if(sf){sf.terminate();sf=null;}sfCb=null;sfInfo=null;}
+function sfRun(mv,ms,only,cb,fail){
+  sfStart().then(()=>{
+    sfInfo=i=>{$('i1').textContent='Stockfish: '+fmt(i);};
+    sf.postMessage('position startpos'+(mv.length?' moves '+mv.join(' '):''));
+    sfCb=cb;sf.postMessage('go movetime '+ms+(only?' searchmoves '+only.join(' '):''));
+  }).catch(()=>{if(fail)fail();else cb(null);});
+}
 
 function sync(){X.setup(X.START,moves);}
-function info(i){
-  const v=Math.abs(i.v)>=90000?'mate':(i.v/100).toFixed(2);
-  $('in').textContent='profundidade '+i.d+' · '+v+' · '+(i.nodes/1000|0)+'k nós';
-}
 function kingSq(){for(let r=0;r<8;r++)for(let f=0;f<8;f++){const p=X.at(f,r);if((p&7)==6&&(p>>3)==X.side())return r*16+f;}return -1;}
 function render(){
   const lg=X.legal().filter(m=>(m&127)==sel),tg={};
@@ -105,29 +102,37 @@ function check(){
   else over='';
 }
 function apply(u){
-  if(!busy)return;
-  moves.push(u);sync();
+  if(!busy||!u)return;
+  jid++;moves.push(u);sync();
   last=[(u.charCodeAt(1)-49)*16+u.charCodeAt(0)-97,(u.charCodeAt(3)-49)*16+u.charCodeAt(2)-97];
   busy=false;sel=-1;check();render();
 }
-function xqMove(){
-  const L=XQ[+$('lv').value];
-  if(w)w.postMessage({fen:X.START,moves:moves.slice(),ms:L.ms,depth:L.d,temp:L.t});
-  else setTimeout(()=>{sync();const m=X.think(L.ms,L.d,L.t,info);apply(X.uci(m));},30);
+function think(){
+  const job=++jid,mv=moves.slice();let sm=null,xm=null,sd=false,xd=false;
+  $('i1').textContent='Stockfish: pensando…';$('i2').textContent='Xeque: pensando…';$('i3').textContent='';
+  const fin=()=>{
+    if(job!=jid||!sd||!xd)return;
+    if(!sm||!xm||sm==xm){$('i3').textContent=sm&&xm?'Os dois cérebros concordam.':'Um cérebro não respondeu, o outro decidiu.';apply(sm||xm);return;}
+    $('i3').textContent='Divergiram ('+sm+' x '+xm+'): o Stockfish desempata.';
+    sfRun(mv,T2,[sm,xm],b=>{if(job==jid)apply(b||sm);});
+  };
+  if(w){
+    w.onmessage=e=>{
+      if(job!=jid)return;
+      if(e.data.info)$('i2').textContent='Xeque: '+fmt(e.data.info);
+      else if(e.data.best){xm=e.data.best;xd=true;fin();}
+    };
+    w.postMessage({fen:X.START,moves:mv,ms:T1,depth:64,temp:0});
+  }else setTimeout(()=>{
+    if(job!=jid)return;
+    sync();const m=X.think(T1,64,0,i=>{$('i2').textContent='Xeque: '+fmt(i);});
+    xm=X.uci(m);xd=true;fin();
+  },50);
+  sfRun(mv,T1,null,b=>{sm=b;sd=true;fin();},()=>{sm=null;sd=true;fin();});
 }
 function engineMove(){
   if(over)return render();
-  busy=true;render();
-  if($('en').value=='sf'){
-    const L=SF[+$('lv').value];
-    if(!sf)$('in').textContent='Carregando Stockfish…';
-    sfStart().then(()=>{
-      sf.postMessage('setoption name UCI_LimitStrength value '+(L.elo?'true':'false'));
-      if(L.elo)sf.postMessage('setoption name UCI_Elo value '+L.elo);
-      sf.postMessage('position startpos'+(moves.length?' moves '+moves.join(' '):''));
-      sfCb=apply;sf.postMessage('go movetime '+L.ms);
-    }).catch(()=>{$('en').value='xq';$('in').textContent='Stockfish não carregou, usando o Xeque.';xqMove();});
-  }else xqMove();
+  busy=true;render();think();
 }
 $('bd').onclick=e=>{
   const el=e.target.closest('.s');if(!el||busy||over||X.side()!=human)return;
@@ -143,19 +148,13 @@ $('bd').onclick=e=>{
   sel=p&&(p>>3)==human?sq:-1;render();
 };
 function nw(){
-  moves=[];human=+$('sd').value;flip=human==1;sel=-1;over='';busy=false;last=[-1,-1];
+  jid++;moves=[];human=+$('sd').value;flip=human==1;sel=-1;over='';busy=false;last=[-1,-1];
   X.reset();if(w){w.terminate();mk();}sfStop();
-  sync();$('in').textContent='';render();
+  sync();$('i1').textContent='';$('i2').textContent='';$('i3').textContent='';render();
   if(human==1)engineMove();
 }
 $('nw').onclick=nw;
 $('fl').onclick=()=>{flip=!flip;render();};
-$('un').onclick=()=>{
-  if(busy)return;
-  const k=X.side()==human?2:1;
-  if(moves.length<k)return;
-  moves.length-=k;sync();over='';sel=-1;last=[-1,-1];render();
-};
 nw();
 </script>
 </body>
