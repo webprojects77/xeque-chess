@@ -126,22 +126,27 @@ function rep(){for(let i=n-2;i>=0&&i>=n-half;i-=2)if(sK[i]==hash)return true;ret
 function inCheck(){return attacked(kg[side],side^1);}
 function np(s){for(let q=0;q<128;q++){if(q&136){q+=7;continue;}const p=b[q];if(p&&(p>>3)==s&&(p&7)>1&&(p&7)<6)return true;}return false;}
 
+const V={nm:337,ne:281,bm:365,be:297,rm:477,re:512,qm:1025,qe:936,pM:1,pE:1,pC:3,nS:14,nSe:14,bS:6,bSe:5,r7:18,r7e:25,rF:2,qS:3,qSe:5,kR:18,kF:12,kE:12,mnm:4,mne:4,mbm:3,mbe:4,mrm:2,mre:3,mqm:1,mqe:2,bpm:28,bpe:45,rom:8,roe:5,dbm:10,dbe:18,ism:9,ise:14,psm:0.5,pse:1.5,shl:9,tmp:8};
 const PM=new Int16Array(16*128),PE=new Int16Array(16*128);
-(function(){
-  const bm=[0,82,337,365,477,1025,0],be=[0,94,281,297,512,936,0];
+let mnm,mne,mbm,mbe,mrm,mre,mqm,mqe,bpm,bpe,rom,roe,dbm,dbe,ism,ise,psm,pse,shl,tmp;
+function build(){
+  const vm=[0,82,V.nm,V.bm,V.rm,V.qm,0],ve=[0,94,V.ne,V.be,V.re,V.qe,0];
   for(let c=0;c<2;c++)for(let ty=1;ty<=6;ty++)for(let sq=0;sq<128;sq++){
     if(sq&136)continue;
     const f=sq&7,r=sq>>4,rr=c?7-r:r,cf=3.5-Math.abs(f-3.5),d=Math.max(Math.abs(f-3.5),Math.abs(r-3.5));
-    let m=bm[ty],e=be[ty];
-    if(ty==1){m+=[0,0,2,6,14,28,50,0][rr]+(rr>1&&rr<5?cf*3:0);e+=[0,0,8,16,30,55,90,0][rr];}
-    else if(ty==2){m+=36-14*d;e+=36-14*d;}
-    else if(ty==3){m+=22-6*d;e+=18-5*d;}
-    else if(ty==4){m+=(rr==6?18:0)+cf*2;e+=rr==6?25:0;}
-    else if(ty==5){m+=12-3*d;e+=20-5*d;}
-    else{m+=-18*rr+12*Math.abs(f-3.5)-30;e+=2-12*d;}
+    let m=vm[ty],e=ve[ty];
+    if(ty==1){m+=[0,0,2,6,14,28,50,0][rr]*V.pM+(rr>1&&rr<5?cf*V.pC:0);e+=[0,0,8,16,30,55,90,0][rr]*V.pE;}
+    else if(ty==2){m+=36-V.nS*d;e+=36-V.nSe*d;}
+    else if(ty==3){m+=22-V.bS*d;e+=18-V.bSe*d;}
+    else if(ty==4){m+=(rr==6?V.r7:0)+cf*V.rF;e+=rr==6?V.r7e:0;}
+    else if(ty==5){m+=12-V.qS*d;e+=20-V.qSe*d;}
+    else{m+=-V.kR*rr+V.kF*Math.abs(f-3.5)-30;e+=2-V.kE*d;}
     PM[(ty|c<<3)<<7|sq]=Math.round(m);PE[(ty|c<<3)<<7|sq]=Math.round(e);
   }
-})();
+  mnm=V.mnm;mne=V.mne;mbm=V.mbm;mbe=V.mbe;mrm=V.mrm;mre=V.mre;mqm=V.mqm;mqe=V.mqe;
+  bpm=V.bpm;bpe=V.bpe;rom=V.rom;roe=V.roe;dbm=V.dbm;dbe=V.dbe;ism=V.ism;ise=V.ise;psm=V.psm;pse=V.pse;shl=V.shl;tmp=V.tmp;
+}
+build();
 
 const PC=[new Int8Array(8),new Int8Array(8)],WX=new Int8Array(8),WN=new Int8Array(8),BX=new Int8Array(8),BN=new Int8Array(8);
 const PASS=[0,5,10,20,35,60,100,0];
@@ -167,34 +172,34 @@ function evalPos(){
         let t=sq+ds[i];
         while(!(t&136)){const x=b[t];if(x){if((x>>3)!=c)mob++;break;}mob++;if(!sl)break;t+=ds[i];}
       }
-      if(ty==N){m[c]+=(mob-4)*4;e[c]+=(mob-4)*4;}
-      else if(ty==B){m[c]+=(mob-6)*3;e[c]+=(mob-6)*4;}
-      else if(ty==R){m[c]+=(mob-7)*2;e[c]+=(mob-7)*3;}
-      else{m[c]+=mob-14;e[c]+=(mob-14)*2;}
+      if(ty==N){m[c]+=(mob-4)*mnm;e[c]+=(mob-4)*mne;}
+      else if(ty==B){m[c]+=(mob-6)*mbm;e[c]+=(mob-6)*mbe;}
+      else if(ty==R){m[c]+=(mob-7)*mrm;e[c]+=(mob-7)*mre;}
+      else{m[c]+=(mob-14)*mqm;e[c]+=(mob-14)*mqe;}
     }
   }
   if(!pawns&&!majors&&minors<=1)return 0;
   for(let c=0;c<2;c++){
-    if(bp[c]>1){m[c]+=28;e[c]+=45;}
-    for(const f of rk[c])if(!PC[c][f]){const o=PC[c^1][f]?1:2;m[c]+=8*o;e[c]+=5*o;}
+    if(bp[c]>1){m[c]+=bpm;e[c]+=bpe;}
+    for(const f of rk[c])if(!PC[c][f]){const o=PC[c^1][f]?1:2;m[c]+=rom*o;e[c]+=roe*o;}
     const ks=kg[c],kr=ks>>4;
-    if((c?7-kr:kr)<=1){const dd=c?-16:16;for(let x=-1;x<=1;x++){const t=ks+dd+x;if(!(t&136)&&b[t]==(P|c<<3))m[c]+=9;}}
+    if((c?7-kr:kr)<=1){const dd=c?-16:16;for(let x=-1;x<=1;x++){const t=ks+dd+x;if(!(t&136)&&b[t]==(P|c<<3))m[c]+=shl;}}
   }
   for(let f=0;f<8;f++){
     for(let c=0;c<2;c++){
       const cnt=PC[c][f];if(!cnt)continue;
-      if(cnt>1){m[c]-=10*(cnt-1);e[c]-=18*(cnt-1);}
-      if(!(f>0&&PC[c][f-1])&&!(f<7&&PC[c][f+1])){m[c]-=9;e[c]-=14;}
+      if(cnt>1){m[c]-=dbm*(cnt-1);e[c]-=dbe*(cnt-1);}
+      if(!(f>0&&PC[c][f-1])&&!(f<7&&PC[c][f+1])){m[c]-=ism;e[c]-=ise;}
       const r=c?BN[f]:WX[f];let ok=true;
       for(let g=f-1;g<=f+1;g++){
         if(g<0||g>7||!PC[c^1][g])continue;
         if(c?WN[g]<r:BX[g]>r){ok=false;break;}
       }
-      if(ok){const rr=c?7-r:r;m[c]+=PASS[rr]/2|0;e[c]+=PASS[rr]*1.5|0;}
+      if(ok){const rr=c?7-r:r;m[c]+=PASS[rr]*psm|0;e[c]+=PASS[rr]*pse|0;}
     }
   }
   const mp=Math.min(ph,24),sc=((m[0]-m[1])*mp+(e[0]-e[1])*(24-mp))/24|0;
-  return (side?-sc:sc)+8;
+  return (side?-sc:sc)+tmp;
 }
 
 function qs(al,be,pl){
@@ -318,7 +323,7 @@ function uci(m){
   return String.fromCharCode(97+(f&7),49+(f>>4),97+(t&7),49+(t>>4))+(pr?' nbrq'[pr-1]:'');
 }
 function parse(s){
-  const f=(s.charCodeAt(1)-49)*16+s.charCodeAt(0)-97,t=(s.charCodeAt(3)-49)*16+s.charCodeAt(2)-97,pr=s[4]?'xnbrq'.indexOf(s[4]):0;
+  const f=(s.charCodeAt(1)-49)*16+s.charCodeAt(0)-97,t=(s.charCodeAt(3)-49)*16+s.charCodeAt(2)-97,pr=s[4]?'..nbrq'.indexOf(s[4]):0;
   for(const m of legal())if((m&127)==f&&(m>>7&127)==t&&(m>>17&7)==pr)return m;
   return 0;
 }
@@ -364,13 +369,22 @@ function think(ms,maxD,temp,cb,ex){
   return bm;
 }
 
-G.Xeque={START,load,legal,make,unmake,uci,parse,setup,reset,status,perft,think,inCheck,key:()=>hash+'_'+hash2,
+function fen(){
+  let r='';
+  for(let y=7;y>=0;y--){let e=0;for(let x=0;x<8;x++){const p=b[y*16+x];if(!p)e++;else{if(e){r+=e;e=0;}const ch='pnbrqk'[(p&7)-1];r+=p>>3?ch:ch.toUpperCase();}}if(e)r+=e;if(y)r+='/';}
+  let c='';if(castle&1)c+='K';if(castle&2)c+='Q';if(castle&4)c+='k';if(castle&8)c+='q';
+  return r+' '+(side?'b':'w')+' '+(c||'-')+' '+(ep>=0?String.fromCharCode(97+(ep&7),49+(ep>>4)):'-')+' '+half+' 1';
+}
+function qscore(){stop=false;tEnd=1e18;return qs(-INF,INF,0);}
+function setWeights(o){Object.assign(V,o);build();}
+G.Xeque={START,fen,qscore,setWeights,weights:()=>Object.assign({},V),evalStatic:evalPos,load,legal,make,unmake,uci,parse,setup,reset,status,perft,think,inCheck,key:()=>hash+'_'+hash2,
   at:(f,r)=>b[r*16+f],side:()=>side};
 if(typeof module!=='undefined')module.exports=G.Xeque;
 if(typeof WorkerGlobalScope!=='undefined'&&typeof self!=='undefined'&&self instanceof WorkerGlobalScope){
   onmessage=e=>{
     const d=e.data;
     if(d.reset){reset();return;}
+    if(d.weights){setWeights(d.weights);return;}
     setup(d.fen,d.moves);
     const m=think(d.ms,d.depth,d.temp,i=>postMessage({info:i}),d.ex);
     postMessage({best:uci(m)});

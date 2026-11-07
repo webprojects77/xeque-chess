@@ -22,6 +22,7 @@ h1{font-size:20px;margin:4px 0 10px}
 .r{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
 button,select{background:#33333c;color:#eee;border:0;border-radius:8px;padding:10px 14px;font-size:15px}
 button:active{background:#4a4a55}
+#gn{position:fixed;left:10px;bottom:max(6px,env(safe-area-inset-bottom));font-size:11px;opacity:.45;pointer-events:none}
 #cr{position:fixed;right:10px;bottom:max(6px,env(safe-area-inset-bottom));font-size:11px;opacity:.45;pointer-events:none}
 </style>
 </head>
@@ -35,8 +36,9 @@ button:active{background:#4a4a55}
 <button id="fl">Virar</button>
 <select id="sd"><option value="0">Jogo de brancas</option><option value="1">Jogo de pretas</option></select>
 </div>
+<div id="gn"></div>
 <div id="cr">Feito por Davi Ch.</div>
-<script src="engine.js?v=6"></script>
+<script src="engine.js?v=8"></script>
 <script>
 const X=Xeque,T1=3000,T2=1200,T3=1500,TH=60;
 const G=['','♟','♞','♝','♜','♛','♚'];
@@ -53,8 +55,10 @@ function learn(k,g,b){
 }
 const lessons=()=>Object.keys(MEM).length;
 
-function mk(){try{w=new Worker('engine.js?v=6');w.onerror=()=>{w=null;};}catch(e){w=null;}}
+let WJ=null;
+function mk(){try{w=new Worker('engine.js?v=8');w.onerror=()=>{w=null;};if(WJ)w.postMessage({weights:WJ.v});}catch(e){w=null;}}
 mk();
+const wp=(typeof fetch=='function'?fetch('weights.json?'+Date.now()):Promise.reject()).then(r=>r.json()).then(j=>{WJ=j;X.setWeights(j.v);if(w)w.postMessage({weights:j.v});$('gn').textContent='cérebro: geração '+j.gen;}).catch(()=>{});
 
 function fmt(i){return 'prof. '+i.d+' · '+(Math.abs(i.v)>=90000?'mate':(i.v/100).toFixed(2));}
 function sfStart(){
@@ -183,7 +187,7 @@ function think(){
 }
 function engineMove(){
   if(over)return render();
-  busy=true;render();think();
+  busy=true;render();const j=jid;wp.then(()=>{if(j==jid)think();});
 }
 $('bd').onclick=e=>{
   const el=e.target.closest('.s');if(!el||busy||over||X.side()!=human)return;

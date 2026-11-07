@@ -1,9 +1,11 @@
 const X=require('./engine.js');
+const fs=require('fs');
 const rl=require('readline').createInterface({input:process.stdin});
 let fen=X.START,mv=[];
 rl.on('line',l=>{
   const t=l.trim().split(/\s+/),g=k=>{const i=t.indexOf(k);return i<0?null:+t[i+1];};
-  if(t[0]=='uci')console.log('id name Xeque JS\nid author 777\nuciok');
+  if(t[0]=='uci')console.log('id name Xeque JS\nid author Davi Ch.\noption name Weights type string default <empty>\nuciok');
+  else if(t[0]=='setoption'&&t[2]=='Weights'){const p=t.slice(4).join(' ');if(p&&p!='<empty>')X.setWeights(JSON.parse(fs.readFileSync(p,'utf8')).v);}
   else if(t[0]=='isready')console.log('readyok');
   else if(t[0]=='ucinewgame')X.reset();
   else if(t[0]=='position'){
