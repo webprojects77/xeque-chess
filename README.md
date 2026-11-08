@@ -89,7 +89,7 @@ Ideias, sem promessa de prazo:
 - **Xeque:** ideia, direção e projeto de **Davi Ch.** · Discord: **777.imt**
 - **Stockfish:** projeto independente, usado aqui como supervisor. Pertence aos autores e colaboradores do Stockfish, sob GPL v3. Build para navegador: Stockfish.js v19.0.1, de Nathan Rugg. O Stockfish não foi criado pelo autor do Xeque.
 - **python-chess** (Niklas Fiekas): usado nos testes e nas partidas de conferência do treino.
-- O código foi escrito com ajuda do Claude, da Anthropic.
+
 
 ---
 
@@ -173,4 +173,4 @@ Ideas, with no deadline promised:
 - **Xeque:** idea, direction and project by **Davi Ch.** · Discord: **777.imt**
 - **Stockfish:** an independent project, used here as a supervisor. It belongs to the Stockfish authors and contributors, under GPL v3. Browser build: Stockfish.js v19.0.1 by Nathan Rugg. Stockfish was not created by Xeque's author.
 - **python-chess** (Niklas Fiekas): used in tests and in the training verification games.
-- The code was written with help from Claude, by Anthropic.
+
