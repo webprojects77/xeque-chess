@@ -68,8 +68,6 @@ body.a #ba{display:flex}
 .big{padding:16px;border-radius:12px;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
 .sec{padding:14px;border-radius:12px;background:#222550;border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600;font-size:14px;width:100%}
 #pc,#pa{display:none}
-#hb{display:none;background:#1e2147;border-radius:12px;padding:12px}
-body.fo #hb{display:block}
 .fbc{display:none}
 body.fo .fbc{display:flex}
 body.fo .fbe{display:none}
@@ -168,8 +166,7 @@ h2,h3,h4{margin:0}
 <div><h3>Partida Casual</h3><p>Jogue no seu ritmo, contra a nossa engine aprimorada.</p></div>
 <button class="big" data-a="nw">▶ Nova Partida</button>
 <button class="sec" data-m="a">🎓 Modo Aprendizado</button>
-<div class="rw"><button data-a="un">↶ Desfazer</button><button data-a="ht">💡 Dica</button><button data-a="fl">⇅ Virar</button></div>
-<div id="hb"><div class="rowi"><div class="fbi">💡</div><div><div class="fbt"></div><div class="fbd"></div></div></div></div>
+<button class="sec" data-a="fl">⇅ Virar tabuleiro</button>
 <div class="qt">“O xadrez é a arte de pensar vários movimentos à frente.”<br>— Xeque Chess</div>
 </div>
 <div id="pa">
@@ -189,7 +186,7 @@ h2,h3,h4{margin:0}
 </aside>
 </div>
 <div id="bb">
-<div class="bbi" id="bc"><button data-a="nw"><span class="gi">＋</span>Novo Jogo</button><button data-a="un"><span class="gi">↶</span>Desfazer</button><button data-a="ht"><span class="gi">💡</span>Dica</button><button data-s="menu"><span class="gi">☰</span>Menu</button></div>
+<div class="bbi" id="bc"><button class="p" data-a="nw"><span class="gi">＋</span>Novo Jogo</button><button data-a="fl"><span class="gi">⇅</span>Virar</button><button data-m="a"><span class="gi">🎓</span>Aprender</button></div>
 <div class="bbi" id="ba"><button data-a="un"><span class="gi">↺</span>Rever</button><button data-a="ht"><span class="gi">💡</span>Dica</button><button class="p" data-a="nx"><span class="gi">▶</span>Próximo</button></div>
 </div>
 </div>
@@ -435,21 +432,12 @@ async function analyze(pre,u,idx,g0){
   }finally{sync();busy=false;renderList();}
 }
 async function hint(){
-  if(busy||over||X.side()!=human)return;
+  if(mode!='a'||busy||over||X.side()!=human)return;
   const key=moves.join(' '),g0=gid;
-  let best=null;
-  if(mode=='a'){
-    if(!bg||bg.key!=key)startBg();
-    if(bg&&!bg.best){stopBg();await bgP;}
-    if(g0!=gid)return;
-    best=bg&&bg.key==key?bg.best:null;
-  }else{
-    busy=true;busyMsg='Procurando uma dica…';render();
-    best=await sfDo({cmds:[pos(moves),'go movetime 800']});
-    busy=false;
-    if(g0!=gid)return;
-    render();
-  }
+  if(!bg||bg.key!=key)startBg();
+  if(bg&&!bg.best){stopBg();await bgP;}
+  if(g0!=gid)return;
+  const best=bg&&bg.key==key?bg.best:null;
   if(!best){setMsg('Dica','Dica indisponível agora.');return;}
   hintLvl=hintKey==key?Math.min(2,hintLvl+1):1;hintKey=key;
   const m=X.parse(best),f=m&127;
@@ -458,7 +446,7 @@ async function hint(){
   render();
 }
 function takeback(){
-  if(busy)return;
+  if(mode!='a'||busy)return;
   const k=X.side()==human?2:1;
   if(moves.length<k)return;
   stopBg();gid++;
@@ -501,7 +489,8 @@ function render(){
     }
   }
   $('bd').innerHTML=h;$('rk').innerHTML=rh;$('fl2').innerHTML=fh;
-  $('st').textContent=over||(busy?busyMsg:X.side()==human?'Sua vez de jogar':'Vez do computador');
+  const md=mat(human)-mat(human^1);
+  $('st').textContent=over||((busy?busyMsg:X.side()==human?'Sua vez de jogar':'Vez do computador')+(md?' · material '+(md>0?'+':'')+md:''));
   renderList();
 }
 function check(){
@@ -514,6 +503,7 @@ function check(){
     counted=true;ST.n++;
     if(s=='mate'){if(X.side()==human)ST.l++;else ST.w++;}else ST.d++;
     saveSt();
+    setTimeout(()=>openSh('fim'),600);
   }
 }
 function apply(u){
@@ -585,7 +575,7 @@ $('bd').onclick=e=>{
   sel=p&&(p>>3)==human?sq:-1;render();
 };
 function nw(){
-  jid++;gid++;moves=[];sans=[];rat=[];human=sideV;flip=human==1;sel=-1;over='';busy=false;last=[-1,-1];hintSq=null;hintLvl=0;bg=null;bgP=null;counted=false;
+  jid++;gid++;moves=[];sans=[];rat=[];human=sideV;flip=human==1;sel=-1;over='';busy=false;last=[-1,-1];hintSq=null;hintLvl=0;bg=null;bgP=null;counted=false;closeSh();
   X.reset();if(w){w.terminate();mk();}sfStop();
   sync();$('i1').textContent='';$('i2').textContent='';$('i3').textContent='Lições guardadas: '+lessons();
   clearFb();steps(4);showEval(0);render();
@@ -601,7 +591,8 @@ function setMode(m){
 function closeSh(){$('sh').classList.remove('on');}
 function openSh(k){
   let h='';
-  if(k=='menu')h='<h2>Menu</h2>'+[['m','c','Jogar'],['m','a','Aprender'],['s','est','Estatísticas'],['s','cfg','Configurações'],['s','sob','Sobre']].map(x=>'<button class="mi" data-'+x[0]+'="'+x[1]+'">'+x[2]+'</button>').join('');
+  if(k=='fim')h='<h2>'+over+'</h2><button class="big" data-a="nw">▶ Nova Partida</button>';
+  else if(k=='menu')h='<h2>Menu</h2>'+[['m','c','Jogar'],['m','a','Aprender'],['s','est','Estatísticas'],['s','cfg','Configurações'],['s','sob','Sobre']].map(x=>'<button class="mi" data-'+x[0]+'="'+x[1]+'">'+x[2]+'</button>').join('');
   else if(k=='est'){
     const c=[['Partidas',ST.n],['Vitórias',ST.w],['Empates',ST.d],['Derrotas',ST.l],['Lances analisados',ST.a],['Lances bons',ST.a?Math.round(ST.ok/ST.a*100)+'%':'—'],['Lições guardadas',lessons()],['Geração do cérebro',WJ?WJ.gen:'—']];
     h='<h2>Estatísticas</h2><div class="sg">'+c.map(x=>'<div><b>'+x[1]+'</b><span>'+x[0]+'</span></div>').join('')+'</div>';
