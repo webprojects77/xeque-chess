@@ -35,7 +35,7 @@ body.fo #mb{display:flex}
 #bw{display:grid;grid-template-columns:var(--bs);grid-template-rows:var(--bs)}
 #rk,#fl2{display:none}
 #bd{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:var(--bs);height:var(--bs);border-radius:8px;overflow:hidden;user-select:none;box-shadow:0 10px 40px rgba(0,0,0,.5),0 0 0 1px #3a3d70}
-.s{display:flex;align-items:center;justify-content:center;font-size:calc(var(--bs)/8*.86);position:relative;line-height:1;min-width:0;min-height:0;overflow:hidden}
+.s{display:flex;align-items:center;justify-content:center;font-size:calc(var(--bs)/8*.86);position:relative;line-height:1;min-width:0;min-height:0}
 .s.l{background:var(--l)}.s.d{background:var(--d)}
 .s.last{background:#a9c23f!important}.s.hint{background:#7fb5e6!important}.s.sel{background:#e9e07a!important}.s.chk{background:#e66!important}
 .s.mv::after{content:"";position:absolute;width:30%;height:30%;border-radius:50%;background:rgba(0,0,0,.28)}
@@ -90,6 +90,25 @@ h2,h3,h4{margin:0}
 .sg div{background:#1f2247;border-radius:12px;padding:12px}
 .sg b{display:block;font-size:22px}
 .sg span{color:var(--mu);font-size:12px}
+.ck{display:none;width:var(--bs);justify-content:space-between;align-items:center;padding:8px 14px;border-radius:10px;background:var(--pn);border:1px solid var(--ln);font-size:15px}
+body.ck .ck{display:flex}
+.ck b{font-variant-numeric:tabular-nums;font-size:20px;padding:2px 10px;border-radius:8px;background:#222550}
+.ck.on b{background:linear-gradient(180deg,#8174f8,#6a5cf0)}
+.ck.lo b{background:#c0392b}
+#rvb{display:none;gap:8px;width:var(--bs)}
+body.rv #rvb{display:flex}
+#rvb button{flex:1;padding:12px;border-radius:10px;background:#222550;border:1px solid var(--ln);font-size:16px}
+body.rv #bb{display:none}
+.sw{display:flex;gap:8px}
+.sw button{flex:1;height:44px;border-radius:10px;border:2px solid transparent;background:conic-gradient(var(--a) 25%,var(--b) 0 50%,var(--a) 0 75%,var(--b) 0) 0 0/50% 50%}
+.sw button.p{border-color:#fff}
+.hl{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--mu);padding:8px 0;border-bottom:1px solid var(--ln)}
+.hl span{flex:1}
+.hl button{padding:6px 10px;border-radius:8px;background:#222550;border:1px solid var(--ln);font-size:12px}
+textarea{width:100%;min-height:70px;border-radius:10px;border:1px solid var(--ln);background:#12142e;color:var(--tx);padding:10px;font:13px monospace}
+.er{color:#ff8a8a;font-size:13px;min-height:18px}
+@media (max-width:999px) and (orientation:landscape){body{--bs:min(calc(100vh - 150px),58vw)}}
+@media (max-width:380px){body{--bs:94vw}.rw button{padding:10px 6px;font-size:13px}}
 @media (min-width:1000px) and (min-aspect-ratio:1/1){
   body{--bs:max(320px,min(calc(100vh - 120px),calc(100vw - 660px - var(--lw)),740px))}
   #app{flex-direction:row}
@@ -140,6 +159,7 @@ h2,h3,h4{margin:0}
 <div class="lg"><svg class="cw" viewBox="0 0 64 50"><use href="#crown"/></svg><span>Xeque<br>Chess</span></div>
 <button class="nv on" data-m="c"><svg class="i" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg>Jogar</button>
 <button class="nv" data-m="a"><svg class="i" viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.9V17h2V9zM5 13.2v4l7 3.8 7-3.8v-4l-7 3.8z"/></svg>Aprender</button>
+<button class="nv" data-a="free"><svg class="i" viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3A6.5 6.5 0 109.5 16a6.5 6.5 0 004.2-1.6l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"/></svg>Análise livre</button>
 <button class="nv" data-s="est"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4V10H4zm6 0h4V4h-4zm6 0h4v-7h-4z"/></svg>Estatísticas</button>
 <button class="nv" data-s="cfg"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10v2H4zm12 0h4v2h-4zM4 15h4v2H4zm6 0h10v2H10zM14 5h2v6h-2zM8 13h2v6H8z"/></svg>Configurações</button>
 <button class="nv" data-s="sob"><svg class="i" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2zm0-8h-2V7h2z"/></svg>Sobre</button>
@@ -158,7 +178,10 @@ h2,h3,h4{margin:0}
 </aside>
 <section id="ct">
 <div id="mb"><div class="fbi">💡</div><div><div class="fbt"></div><div class="fbd"></div></div></div>
+<div class="ck" id="ckT"></div>
 <div id="bw"><div id="rk"></div><div id="bd"></div><div></div><div id="fl2"></div></div>
+<div class="ck" id="ckB"></div>
+<div id="rvb"><button data-a="rv0">⏮</button><button data-a="rv1">◀</button><button data-a="rv2">▶</button><button data-a="rv3">⏭</button><button data-a="rvx">✕ Sair</button></div>
 <div id="st"></div>
 <div class="card mev"><div class="evh"><span>Avaliação</span><span class="evv">0.00</span></div><div class="evb"><i></i></div></div>
 </section>
@@ -167,6 +190,8 @@ h2,h3,h4{margin:0}
 <div><h3>Partida Casual</h3><p>Jogue no seu ritmo, contra a nossa engine aprimorada.</p></div>
 <button class="big" data-a="nw">▶ Nova Partida</button>
 <button class="sec" data-m="a">🎓 Modo Aprendizado</button>
+<button class="sec" data-s="cfg">⚙ Opções da partida</button>
+<button class="sec" data-a="free">🔍 Análise livre</button>
 <button class="sec" data-a="fl">⇅ Virar tabuleiro</button>
 <div class="qt">“O xadrez é a arte de pensar vários movimentos à frente.”<br>— Xeque Chess</div>
 </div>
@@ -193,18 +218,43 @@ h2,h3,h4{margin:0}
 </div>
 <div id="sh"><div id="sc"></div></div>
 <script src="engine.js?v=8"></script>
+<script src="chess-util.js?v=1"></script>
+<input type="file" id="pgf" accept=".pgn,.txt,text/plain" hidden>
 <script>
-const X=Xeque,T1=3000,T2=1200,T3=1500,TH=60;
+const X=Xeque,U=XUtil,T1=3000,T2=1200,T3=1500,TH=60;
 const PN=['','peão','cavalo','bispo','torre','dama','rei'];
 const RT=[{n:'Muito ruim',c:'#e5484d',s:'??'},{n:'Ruim',c:'#f08a24',s:'?'},{n:'Mediano',c:'#e9c46a',s:'?!'},{n:'Bom',c:'#8bc34a',s:''},{n:'Excelente',c:'#43a047',s:'!'},{n:'Melhor lance',c:'#26a69a',s:'!'}];
 const TT=['Lance muito fraco','Lance fraco','Dá pra melhorar','Boa jogada!','Ótimo lance!','Melhor jogada!'];
 const TIPS=['Controlar o centro do tabuleiro é uma ótima estratégia.','Desenvolva cavalos e bispos antes de sair com a dama.','Role cedo: o rei fica mais seguro e a torre entra no jogo.','Evite mover a mesma peça duas vezes na abertura.','Antes de cada lance, confira se alguma peça sua ficou sem defesa.','Troque peças quando estiver na frente em material.','Torres rendem mais em colunas abertas.'];
 const $=id=>document.getElementById(id);
 const all=s=>document.querySelectorAll(s);
-let moves=[],sans=[],rat=[],human=0,sideV=0,flip=false,sel=-1,busy=false,busyMsg='Pensando…',over='',last=[-1,-1],hintSq=null,hintLvl=0,hintKey='',mode='c',bg=null,bgP=null,gid=0,jid=0,w=null,sf=null,sfOk=null,sfCb=null,sfCur=null,sfBusy=false,sfq=[],MEM={},WJ=null,counted=false,ST={n:0,w:0,l:0,d:0,a:0,ok:0};
+let moves=[],sans=[],rat=[],human=0,sideV=0,flip=false,sel=-1,busy=false,busyMsg='Pensando…',over='',last=[-1,-1],hintSq=null,hintLvl=0,hintKey='',mode='c',bg=null,bgP=null,gid=0,jid=0,w=null,sf=null,sfOk=null,sfCb=null,sfCur=null,sfBusy=false,sfq=[],MEM={},WJ=null,counted=false,ST={n:0,w:0,l:0,d:0,a:0,ok:0,elo:1000};
 try{MEM=JSON.parse(localStorage.getItem('xeque_mem')||'{}');}catch(e){MEM={};}
 try{ST=Object.assign(ST,JSON.parse(localStorage.getItem('xeque_st')||'{}'));}catch(e){}
 const saveSt=()=>{try{localStorage.setItem('xeque_st',JSON.stringify(ST));}catch(e){}};
+const LV=[
+{n:'Principiante',d:1,t:220,ms:300,e:1350,r:600},
+{n:'Principiante avançado',d:2,t:140,ms:400,e:1450,r:800},
+{n:'Médio iniciante',d:2,t:70,ms:500,e:1600,r:1000},
+{n:'Médio',d:3,t:40,ms:700,e:1750,r:1200},
+{n:'Médio avançado',d:4,t:20,ms:900,e:1900,r:1400},
+{n:'Difícil iniciante',d:5,t:10,ms:1200,e:2050,r:1600},
+{n:'Difícil',d:8,t:0,ms:1000,e:2250,r:1900},
+{n:'Difícil avançado',d:64,t:0,ms:2000,e:2500,r:2200},
+{n:'Impossível',d:64,t:0,ms:T1,e:0,r:2500}
+];
+const THEMES={classic:['#f2dab8','#b98862','Clássico'],green:['#eeeed2','#769656','Verde'],blue:['#dee3e6','#8ca2ad','Azul'],purple:['#ece4fb','#9b7fd4','Roxo'],wood:['#c9b79c','#6b4a35','Madeira']};
+const TIMES=[['Sem relógio',0,0],['3 min',180,0],['5 min',300,0],['10 min',600,0],['3+2',180,2],['5+3',300,3]];
+const PRE=[['Final de torre','8/5pk1/6p1/8/8/6P1/5PK1/R7 w - - 0 1'],['Mate na última fileira','6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1'],['Rei e dama contra rei','8/8/8/4k3/8/8/3QK3/8 w - - 0 1']];
+let CFG={snd:true,an:true,th:'classic',lv:8,opp:'x',tb:0,ti:0,side:0};
+try{CFG=Object.assign(CFG,JSON.parse(localStorage.getItem('xeque_cfg')||'{}'));}catch(e){}
+sideV=CFG.side|0;
+let HIST=[];
+try{HIST=JSON.parse(localStorage.getItem('xeque_hist')||'[]');}catch(e){HIST=[];}
+const saveCfg=()=>{try{localStorage.setItem('xeque_cfg',JSON.stringify(CFG));}catch(e){}};
+const saveHist=()=>{try{localStorage.setItem('xeque_hist',JSON.stringify(HIST));}catch(e){}};
+let players=['h','x'],free=false,auto=false,base=X.START,clk=null,anim=null,res='*',rv=null,rvi=0,rvb=null,AC=null;
+
 function learn(k,g,b){
   const e=MEM[k]||{g:'',b:[]};
   if(g)e.g=g;
@@ -215,15 +265,15 @@ function learn(k,g,b){
 }
 const lessons=()=>Object.keys(MEM).length;
 
-function mk(){try{w=new Worker('engine.js?v=8');w.onerror=()=>{w=null;};if(WJ)w.postMessage({weights:WJ.v});}catch(e){w=null;}}
+function mk(){try{w=new Worker('engine.js?v=8');w.onerror=()=>{w=null;$('i1').textContent='Xeque rodando sem processo separado.';};if(WJ)w.postMessage({weights:WJ.v});}catch(e){w=null;}}
 mk();
-const wp=(typeof fetch=='function'?fetch('weights.json?'+Date.now()):Promise.reject()).then(r=>r.json()).then(j=>{WJ=j;X.setWeights(j.v);if(w)w.postMessage({weights:j.v});$('gn').textContent='cérebro: geração '+j.gen;}).catch(()=>{});
+const wp=(typeof fetch=='function'?fetch('weights.json?'+Date.now()):Promise.reject()).then(r=>r.json()).then(j=>{WJ=j;X.setWeights(j.v);if(w)w.postMessage({weights:j.v});$('gn').textContent='cérebro: geração '+j.gen;}).catch(()=>{$('gn').textContent='cérebro: padrão (pesos não carregados)';});
 
 const fmt=i=>'prof. '+i.d+' · '+(Math.abs(i.v)>=90000?'mate':(i.v/100).toFixed(2));
 const fe=v=>Math.abs(v)>=90000?(v>0?'mate a seu favor':'mate contra você'):(v>0?'+':'')+(v/100).toFixed(1);
 const wpr=s=>1/(1+Math.exp(-s/400));
 const sqn=s=>'abcdefgh'[s&7]+((s>>4)+1);
-const pos=mv=>'position startpos'+(mv.length?' moves '+mv.join(' '):'');
+const pos=mv=>(base==X.START?'position startpos':'position fen '+base)+(mv.length?' moves '+mv.join(' '):'');
 
 function paint(c,ic,t,d,x){
   document.body.classList.add('fo');
@@ -256,9 +306,10 @@ const reg=cls=>{ST.a++;if(cls>=3)ST.ok++;saveSt();updPg();};
 function sfStart(){
   if(sf)return sfOk;
   sfOk=new Promise((res,rej)=>{
+    $('i2').textContent='Stockfish: carregando…';
     try{
       sf=new Worker('stockfish/stockfish-19-lite-single.js');
-      sf.onerror=()=>{sf=null;rej();};
+      sf.onerror=()=>{sf=null;$('i2').textContent='Stockfish indisponível (erro ao carregar).';rej();};
       sf.onmessage=e=>{
         const l=typeof e.data=='string'?e.data:'';
         if(l=='uciok')sf.postMessage('isready');
@@ -311,45 +362,24 @@ function sfCompare(mv,list,cb){
   const multi={},pvs={};
   sfDo({cmds:['setoption name MultiPV value '+list.length,pos(mv),'go movetime '+T2+' searchmoves '+list.join(' ')],after:['setoption name MultiPV value 1'],multi,pvs}).then(b=>cb(b?multi:null,pvs));
 }
-function xqRun(job,mv,ms,ex,cb){
+function xqRun(job,mv,ms,ex,cb,dp,tp){
   if(w){
     w.onmessage=e=>{
       if(job!=jid)return;
       if(e.data.info)$('i1').textContent='Xeque (principal): '+fmt(e.data.info);
       else if(e.data.best)cb(e.data.best);
     };
-    w.postMessage({fen:X.START,moves:mv,ms:ms,depth:64,temp:0,ex:ex});
+    w.postMessage({fen:base,moves:mv,ms:ms,depth:dp||64,temp:tp||0,ex:ex});
   }else setTimeout(()=>{
     if(job!=jid)return;
-    sync();const m=X.think(ms,64,0,i=>{$('i1').textContent='Xeque (principal): '+fmt(i);},ex);
+    sync();const m=X.think(ms,dp||64,tp||0,i=>{$('i1').textContent='Xeque (principal): '+fmt(i);},ex);
     cb(X.uci(m));
   },50);
 }
 
-function sync(){X.setup(X.START,moves);}
+function sync(){X.setup(base,moves);}
 const mat=c=>{let s=0;const v=[0,1,3,3,5,9,0];for(let r=0;r<8;r++)for(let f=0;f<8;f++){const p=X.at(f,r);if(p&&(p>>3)==c)s+=v[p&7];}return s;};
-function san(m){
-  const f=m&127,t=m>>7&127,fl=m>>14&7,pr=m>>17&7,ty=X.at(f&7,f>>4)&7;
-  let s='';
-  if(fl==2)s=t>f?'O-O':'O-O-O';
-  else{
-    const cap=X.at(t&7,t>>4)||fl==1;
-    if(ty==1){if(cap)s+='abcdefgh'[f&7];}
-    else{
-      s+='??NBRQK'[ty];
-      const amb=X.legal().filter(o=>o!=m&&(o>>7&127)==t&&(X.at((o&127)&7,(o&127)>>4)&7)==ty);
-      if(amb.length){
-        const sameF=amb.some(o=>(o&7)==(f&7)),sameR=amb.some(o=>((o&127)>>4)==(f>>4));
-        s+=!sameF?'abcdefgh'[f&7]:!sameR?String((f>>4)+1):'abcdefgh'[f&7]+((f>>4)+1);
-      }
-    }
-    if(cap)s+='x';
-    s+=sqn(t);
-    if(pr)s+='='+'??NBRQ'[pr];
-  }
-  X.make(m);const ck=X.inCheck(),n=X.legal().length;X.unmake();
-  return s+(ck?(n?'+':'#'):'');
-}
+const san=m=>U.san(X,m);
 function why(m){
   const f=m&127,t=m>>7&127,fl=m>>14&7,ty=X.at(f&7,f>>4)&7,cap=X.at(t&7,t>>4)||fl==1;
   if(fl==2)return 'o roque deixa o rei mais seguro e ativa a torre';
@@ -364,21 +394,21 @@ function why(m){
 function classify(sB,sP){const d=wpr(sB)-wpr(sP);return d<=.02?4:d<=.05?3:d<=.1?2:d<=.2?1:0;}
 function explain(pre,pu,bu,sc,pv,cls){
   const out=[];
-  X.setup(X.START,pre);
+  X.setup(base,pre);
   const me=X.side(),mp=X.parse(pu),mb=X.parse(bu),bs=mb?san(mb):bu,sP=sc[pu],sB=sc[bu];
   const bal=line=>{
-    X.setup(X.START,pre);
+    X.setup(base,pre);
     const b0=mat(me)-mat(me^1),n=line.length>=4?4:line.length&~1;
     for(let i=0;i<n;i++){const m=X.parse(line[i]);if(!m)break;X.make(m);}
     const d=mat(me)-mat(me^1)-b0;
-    X.setup(X.START,pre);return d;
+    X.setup(base,pre);return d;
   };
   const dP=bal(pv[pu]||[pu]),dB=bal(pv[bu]||[bu]);
   if(sB>=90000&&sP<90000)out.push('Você tinha um xeque-mate forçado com '+bs+'.');
   else if(sP<=-90000)out.push('Esse lance permite um xeque-mate do adversário.');
   else if(dP<=-2){
     const rep=(pv[pu]||[])[1];
-    X.setup(X.START,pre.concat([pu]));
+    X.setup(base,pre.concat([pu]));
     const rm=rep?X.parse(rep):0;
     if(rm){
       const t=rm>>7&127,c=X.at(t&7,t>>4);
@@ -386,15 +416,15 @@ function explain(pre,pu,bu,sc,pv,cls){
     }
     out.push('Perda estimada: '+(-dP)+' ponto(s) de material.');
   }
-  X.setup(X.START,pre);
+  X.setup(base,pre);
   if(dB>=2&&dB-dP>=2&&out.length<2)out.push('Havia '+bs+', que ganhava cerca de '+dB+' ponto(s) de material.');
   if(!out.length)out.push(cls>=3?'Lance sólido: '+why(mp)+'.':'O melhor lance era '+bs+': '+why(mb)+'.');
-  X.setup(X.START,pre);
+  X.setup(base,pre);
   return{lines:out,bs:bs};
 }
 
 function startBg(){
-  if(mode!='a'||over||X.side()!=human)return;
+  if(mode!='a'||over||!isH())return;
   const key=moves.join(' '),g0=gid,o={};
   bg={key,best:null,v:null};
   bgP=sfDo({bg:true,cmds:[pos(moves),'go movetime 2500'],out:o}).then(b=>{
@@ -414,7 +444,7 @@ async function analyze(pre,u,idx,g0){
     else best=await sfDo({cmds:[pos(pre),'go movetime 800']});
     if(g0!=gid)return;
     if(!best){setMsg('Análise','Análise indisponível agora.');return;}
-    X.setup(X.START,pre);const mp=X.parse(u);
+    X.setup(base,pre);const mp=X.parse(u);
     if(best==u){
       const lines=['É o lance que o Stockfish escolheria: '+why(mp)+'.'];
       sync();rat[idx]=5;setFb(5,lines,'');reg(5);
@@ -432,7 +462,7 @@ async function analyze(pre,u,idx,g0){
   }finally{sync();busy=false;renderList();}
 }
 async function hint(){
-  if(mode!='a'||busy||over||X.side()!=human)return;
+  if(mode!='a'||busy||over||!isH())return;
   const key=moves.join(' '),g0=gid;
   if(!bg||bg.key!=key)startBg();
   if(bg&&!bg.best){stopBg();await bgP;}
@@ -446,8 +476,8 @@ async function hint(){
   render();
 }
 function takeback(){
-  if(mode!='a'||busy)return;
-  const k=X.side()==human?2:1;
+  if(mode!='a'||busy||auto||rv)return;
+  const k=free?1:(isH()?2:1);
   if(moves.length<k)return;
   stopBg();gid++;
   moves.length-=k;sans.length-=k;rat.length-=k;
@@ -456,7 +486,7 @@ function takeback(){
   last=u?[(u.charCodeAt(1)-49)*16+u.charCodeAt(0)-97,(u.charCodeAt(3)-49)*16+u.charCodeAt(2)-97]:[-1,-1];
   clearFb();
   render();
-  if(X.side()!=human)engineMove();else startBg();
+  if(!isH())engineMove();else startBg();
 }
 
 function kingSq(){for(let r=0;r<8;r++)for(let f=0;f<8;f++){const p=X.at(f,r);if((p&7)==6&&(p>>3)==X.side())return r*16+f;}return -1;}
@@ -490,31 +520,52 @@ function render(){
   }
   $('bd').innerHTML=h;$('rk').innerHTML=rh;$('fl2').innerHTML=fh;
   const md=mat(human)-mat(human^1);
-  $('st').textContent=over||((busy?busyMsg:X.side()==human?'Sua vez de jogar':'Vez do computador')+(md?' · material '+(md>0?'+':'')+md:''));
+  $('st').textContent=rv?'Revisão: lance '+rvi+' de '+moves.length:over||((busy?busyMsg:isH()?(free?(X.side()?'Vez das pretas':'Vez das brancas'):'Sua vez de jogar'):auto?(X.side()?'Pretas pensando…':'Brancas pensando…'):'Vez do computador')+(md?' · material '+(md>0?'+':'')+md:''));
+  clkShow();
+  if(anim){doAnim();anim=null;}
   renderList();
 }
-function check(){
-  const s=X.status();
-  if(s=='mate')over='Xeque-mate! '+(X.side()==human?'O computador ganhou.':'Você ganhou!');
-  else if(s=='stalemate')over='Empate por afogamento.';
-  else if(s)over='Empate.';
-  else over='';
-  if(over&&!counted){
-    counted=true;ST.n++;
-    if(s=='mate'){if(X.side()==human)ST.l++;else ST.w++;}else ST.d++;
-    saveSt();
-    setTimeout(()=>openSh('fim'),600);
-  }
+const nm=s=>auto||free?(s?'As pretas':'As brancas'):(s==human?'Você':'O computador');
+function endGame(msg,r){
+  over=msg;res=r;clkStop();
+  if(counted)return;
+  counted=true;record(r);
+  setTimeout(()=>openSh('fim'),600);
 }
+function check(){
+  const q=X.status();
+  if(q=='mate'){const l=X.side();endGame('Xeque-mate! '+nm(l^1)+' ganhou.',l?'1-0':'0-1');}
+  else if(q=='stalemate')endGame('Empate por afogamento.','1/2-1/2');
+  else if(q)endGame('Empate.','1/2-1/2');
+}
+function record(r){
+  if(!auto&&!free){
+    ST.n++;
+    const sc=r=='1/2-1/2'?.5:((r=='1-0')==(human==0)?1:0);
+    if(sc==1)ST.w++;else if(sc==.5)ST.d++;else ST.l++;
+    if(base==X.START){const R=LV[CFG.lv].r,E=1/(1+Math.pow(10,(R-ST.elo)/400));ST.elo=Math.round(ST.elo+32*(sc-E));}
+    saveSt();
+  }
+  HIST.unshift({t:Date.now(),r:r,m:moves.slice(),b:base,w:players.slice(),l:CFG.lv});
+  if(HIST.length>60)HIST.length=60;
+  saveHist();
+}
+const mvKind=m=>{const t=m>>7&127;return(m>>17&7)?'promo':(X.at(t&7,t>>4)||(m>>14&7)==1)?'cap':'mv';};
+function playSnd(k){if(/^Xeque-mate/.test(over))snd('mate');else if(X.inCheck())snd('chk');else snd(k);}
 function apply(u){
-  if(!busy||!u)return;
+  if(!busy||!u||over)return;
   jid++;
-  const m=X.parse(u);sans.push(m?san(m):u);rat.push(-1);moves.push(u);sync();
+  const m=X.parse(u),k=m?mvKind(m):'mv';
+  sans.push(m?san(m):u);rat.push(-1);moves.push(u);sync();
   last=[(u.charCodeAt(1)-49)*16+u.charCodeAt(0)-97,(u.charCodeAt(3)-49)*16+u.charCodeAt(2)-97];
-  busy=false;sel=-1;hintSq=null;hintLvl=0;check();render();startBg();
+  anim=[last[0],last[1]];
+  busy=false;sel=-1;hintSq=null;hintLvl=0;clkMoved(X.side()^1);check();playSnd(k);render();startBg();
+  if(auto&&!over)setTimeout(()=>{if(!over&&!busy&&!rv)engineMove();},350);
 }
 function think(){
-  const job=++jid,mv=moves.slice(),key=X.key(),mem=MEM[key];
+  const job=++jid,mv=moves.slice(),key=X.key(),mem=MEM[key],pl=players[X.side()];
+  if(pl=='s'){thinkSf(job,mv);return;}
+  if(auto||CFG.lv<8){thinkX(job,mv);return;}
   $('i1').textContent='Xeque (principal): pensando…';$('i2').textContent='Stockfish (supervisor): pensando…';$('i3').textContent='';
   const play=(u,t)=>{if(job!=jid)return;$('i3').textContent=t+' · lições guardadas: '+lessons();apply(u);};
   if(mem&&mem.g&&X.parse(mem.g)){play(mem.g,'Xeque lembrou de uma lição e jogou direto.');return;}
@@ -543,61 +594,220 @@ function think(){
       });
     });
   };
-  xqRun(job,mv,T1,ex,m=>{xm=m;xd=true;fin();});
-  sfRun(mv,T1,b=>{sm=b;sd=true;fin();},()=>{sm=null;sd=true;fin();});
+  xqRun(job,mv,cap(T1),ex,m=>{xm=m;xd=true;fin();});
+  sfRun(mv,cap(T1),b=>{sm=b;sd=true;fin();},()=>{sm=null;sd=true;fin();});
 }
+const cap=ms=>clk?Math.max(80,Math.min(ms,clk.t[X.side()]/20)):ms;
+const isH=()=>!rv&&(free||players[X.side()]=='h');
+function setPlayers(){
+  const o=CFG.opp;
+  if(free)players=['h','h'];
+  else if(o=='xs')players=['x','s'];
+  else if(o=='sx')players=['s','x'];
+  else players=sideV==0?['h',o]:[o,'h'];
+  auto=players.indexOf('h')<0;
+}
+const fc=ms=>{ms=Math.max(0,ms);if(ms<10000)return'0:'+(ms/1000).toFixed(1).padStart(4,'0');const t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};
+function clkInit(){
+  clkStop();
+  const b=CFG.tb*1000;
+  clk=b&&mode!='a'&&!free?{t:[b,b],inc:CFG.ti*1000,at:0,id:0}:null;
+}
+function clkStart(){if(!clk||over)return;clk.at=Date.now();if(!clk.id)clk.id=setInterval(clkTick,200);}
+function clkStop(){if(clk&&clk.id){clearInterval(clk.id);clk.id=0;}}
+function clkTick(){
+  if(!clk||over||rv)return;
+  const now=Date.now(),q=X.side();
+  clk.t[q]-=now-clk.at;clk.at=now;
+  if(clk.t[q]<=0){clk.t[q]=0;timeout(q);return;}
+  clkShow();
+}
+function clkMoved(q){
+  if(!clk||over)return;
+  clkTick();
+  if(over)return;
+  clk.t[q]+=clk.inc;clk.at=Date.now();
+}
+function timeout(q){
+  jid++;busy=false;
+  endGame('Tempo esgotado! '+nm(q^1)+' ganhou.',q?'1-0':'0-1');
+  render();
+}
+function clkShow(){
+  document.body.classList.toggle('ck',!!clk);
+  if(!clk)return;
+  const bot=flip?1:0;
+  [['ckT',bot^1],['ckB',bot]].forEach(a=>{
+    const e=$(a[0]),q=a[1],t=clk.t[q],p=players[q];
+    e.className='ck'+(!over&&X.side()==q?' on':'')+(t<10000?' lo':'');
+    e.innerHTML='<span>'+(p=='h'?'Você':p=='x'?'Xeque':'Stockfish')+'</span><b>'+fc(t)+'</b>';
+  });
+}
+function tone(f,t0,d,v,ty){
+  const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+t0;
+  o.type=ty;o.frequency.value=f;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.005);g.gain.exponentialRampToValueAtTime(.001,t+d);
+  o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d+.02);
+}
+const SND={
+  mv:[[300,0,.06,.25,'triangle'],[150,0,.08,.3,'sine']],
+  cap:[[200,0,.07,.35,'square'],[90,0,.12,.4,'sine'],[500,.02,.04,.12,'triangle']],
+  chk:[[700,0,.1,.2,'square'],[900,.1,.12,.2,'square']],
+  mate:[[520,0,.15,.3,'triangle'],[440,.15,.15,.3,'triangle'],[330,.3,.35,.35,'triangle']],
+  promo:[[440,0,.08,.25,'triangle'],[554,.08,.08,.25,'triangle'],[659,.16,.08,.25,'triangle'],[880,.24,.18,.3,'triangle']],
+  bad:[[110,0,.18,.3,'sawtooth'],[90,.12,.2,.3,'sawtooth']]
+};
+function snd(k){
+  if(!CFG.snd||!SND[k])return;
+  try{
+    AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+    if(AC.state=='suspended')AC.resume();
+    SND[k].forEach(a=>tone(a[0],a[1],a[2],a[3],a[4]));
+  }catch(e){}
+}
+function applyTheme(){
+  const t=THEMES[CFG.th]||THEMES.classic,r=document.documentElement.style;
+  r.setProperty('--l',t[0]);r.setProperty('--d',t[1]);
+}
+function doAnim(){
+  if(!CFG.an)return;
+  const a=document.querySelector('[data-q="'+anim[0]+'"]'),b=document.querySelector('[data-q="'+anim[1]+'"]'),p=b&&b.querySelector('.pc');
+  if(!a||!p||!p.animate)return;
+  const ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect();
+  b.style.zIndex=3;
+  p.animate([{transform:'translate('+(ra.left-rb.left)+'px,'+(ra.top-rb.top)+'px)'},{transform:'none'}],{duration:170,easing:'ease-out'});
+}
+function thinkX(job,mv){
+  const lv=LV[CFG.lv];
+  $('i1').textContent='Xeque: pensando…';$('i2').textContent='';$('i3').textContent='Nível: '+lv.n;
+  xqRun(job,mv,cap(lv.ms),[],m=>{if(job!=jid)return;apply(m);},lv.d,lv.t);
+}
+function thinkSf(job,mv){
+  const lv=LV[CFG.lv];
+  $('i1').textContent='';$('i2').textContent='Stockfish: pensando…';$('i3').textContent='Nível: '+lv.n;
+  const c=['setoption name UCI_LimitStrength value '+(lv.e?'true':'false')];
+  if(lv.e)c.push('setoption name UCI_Elo value '+lv.e);
+  c.push(pos(mv),'go movetime '+cap(lv.e?Math.min(lv.ms,1500):T1));
+  sfDo({cmds:c,after:['setoption name UCI_LimitStrength value false'],info:i=>{$('i2').textContent='Stockfish: '+fmt(i);}}).then(b=>{
+    if(job!=jid)return;
+    if(!b){busy=false;$('i3').textContent='Stockfish indisponível. Use o Xeque como adversário.';render();return;}
+    if(auto||free||CFG.opp!='s'){apply(b);return;}
+    xqRun(job,mv,T2,[],xm=>{
+      if(job!=jid)return;
+      $('i3').textContent=xm==b?'Xeque concorda com o lance do Stockfish.':'Xeque supervisionou: preferiria '+xm+'.';
+      apply(b);
+    });
+  });
+}
+const curH=()=>({t:Date.now(),r:res,m:moves.slice(),b:base,w:players.slice()});
+function dlPgn(h){
+  const t=U.pgnOf(X,h);sync();
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'application/x-chess-pgn'}));a.download='xeque-'+new Date(h.t||Date.now()).toISOString().slice(0,10)+'.pgn';document.body.appendChild(a);a.click();a.remove();}catch(e){}
+  try{navigator.clipboard.writeText(t);}catch(e){}
+  $('i3').textContent='PGN exportado.';
+}
+function openRv(h){
+  closeSh();jid++;gid++;stopBg();sfStop();clkStop();clk=null;
+  if(!rv)rvb=base;
+  base=h.b||X.START;moves=h.m.slice();
+  X.setup(base,[]);sans=[];
+  for(const u of moves){const m=X.parse(u);if(!m)break;sans.push(san(m));X.make(m);}
+  rat=sans.map(()=>-1);rv=true;rvi=sans.length;over='';busy=false;sel=-1;hintSq=null;
+  document.body.classList.add('rv');
+  rvGo(0);
+}
+function rvGo(d){
+  rvi=d==-9?0:d==9?sans.length:Math.max(0,Math.min(sans.length,rvi+d));
+  X.setup(base,moves.slice(0,rvi));
+  const u=moves[rvi-1];
+  last=u?[(u.charCodeAt(1)-49)*16+u.charCodeAt(0)-97,(u.charCodeAt(3)-49)*16+u.charCodeAt(2)-97]:[-1,-1];
+  sel=-1;hintSq=null;render();
+  if(d&&d!=-9&&d!=9)snd('mv');
+}
+function rvExit(){rv=null;if(rvb)base=rvb;rvb=null;document.body.classList.remove('rv');nw();}
+$('pgf').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{const g=U.parsePgn(X,String(r.result));sync();if(g)openRv({b:g.b,m:g.m});else alert('Não consegui ler esse PGN.');};
+  r.readAsText(f);e.target.value='';
+};
 function engineMove(){
   if(over)return render();
   busy=true;busyMsg='Pensando…';render();
   const j=jid;wp.then(()=>{if(j==jid)think();});
 }
 function humanMove(m){
-  const pre=moves.slice(),u=X.uci(m),sn=san(m),g0=gid;
+  const pre=moves.slice(),u=X.uci(m),sn=san(m),g0=gid,k=mvKind(m),mover=X.side();
   moves.push(u);sans.push(sn);rat.push(-1);sync();
-  last=[m&127,m>>7&127];sel=-1;hintSq=null;hintLvl=0;check();render();
+  last=[m&127,m>>7&127];anim=[last[0],last[1]];sel=-1;hintSq=null;hintLvl=0;clkMoved(mover);check();playSnd(k);render();
   if(over)return;
-  if(mode=='a')analyze(pre,u,moves.length-1,g0).then(()=>{if(g0==gid&&!over)engineMove();});
-  else{clearFb();engineMove();}
+  const nxt=()=>{if(g0!=gid||over)return;if(isH())startBg();else engineMove();};
+  if(mode=='a')analyze(pre,u,moves.length-1,g0).then(nxt);
+  else{clearFb();nxt();}
 }
 $('bd').onclick=e=>{
-  const el=e.target.closest('.s');if(!el||busy||over||X.side()!=human)return;
+  const el=e.target.closest('.s');if(!el||busy||over||!isH())return;
   const sq=+el.dataset.q;
   let mv=X.legal().filter(m=>(m&127)==sel&&(m>>7&127)==sq);
   if(!mv.length&&sel>=0){
     const sp=X.at(sel&7,sel>>4),tp=X.at(sq&7,sq>>4);
-    if(sp&&tp&&(sp>>3)==human&&(tp>>3)==human&&(((sp&7)==6&&(tp&7)==4)||((sp&7)==4&&(tp&7)==6))){
+    if(sp&&tp&&(sp>>3)==X.side()&&(tp>>3)==X.side()&&(((sp&7)==6&&(tp&7)==4)||((sp&7)==4&&(tp&7)==6))){
       const k=(sp&7)==6?sel:sq,r=(sp&7)==6?sq:sel,dest=r>k?k+2:k-2;
       mv=X.legal().filter(m=>(m&127)==k&&(m>>7&127)==dest&&(m>>14&7)==2);
     }
   }
   if(mv.length){humanMove(mv.find(x=>(x>>17&7)==5)||mv[0]);return;}
   const p=X.at(sq&7,sq>>4);
-  sel=p&&(p>>3)==human?sq:-1;render();
+  const ok=p&&(p>>3)==X.side();
+  if(sel>=0&&!ok)snd('bad');
+  sel=ok?sq:-1;render();
 };
 function nw(){
-  jid++;gid++;moves=[];sans=[];rat=[];human=sideV;flip=human==1;sel=-1;over='';busy=false;last=[-1,-1];hintSq=null;hintLvl=0;bg=null;bgP=null;counted=false;closeSh();
+  jid++;gid++;moves=[];sans=[];rat=[];sel=-1;over='';busy=false;last=[-1,-1];hintSq=null;hintLvl=0;bg=null;bgP=null;counted=false;res='*';anim=null;rv=null;document.body.classList.remove('rv');closeSh();
+  setPlayers();human=Math.max(0,players.indexOf('h'));flip=!auto&&!free&&human==1;
   X.reset();if(w){w.terminate();mk();}sfStop();
   sync();$('i1').textContent='';$('i2').textContent='';$('i3').textContent='Lições guardadas: '+lessons();
-  clearFb();steps(4);showEval(0);render();
-  if(human==1)engineMove();else startBg();
+  clkInit();clearFb();steps(4);showEval(0);render();
+  if(!isH())engineMove();else startBg();
+  clkStart();
 }
-function setMode(m){
-  mode=m;document.body.classList.toggle('a',m=='a');
-  all('#sb [data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m==m));
+function setMode(m,f){
+  const fc=free!=!!f;
+  mode=m;free=!!f;document.body.classList.toggle('a',m=='a');
+  all('#sb [data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m==m&&!free));
   hintSq=null;hintLvl=0;clearFb();
+  if(fc){nw();return;}
+  if(m=='a'&&clk){clkStop();clk=null;}
   if(m=='a')startBg();else stopBg();
   render();
 }
 function closeSh(){$('sh').classList.remove('on');}
 function openSh(k){
   let h='';
-  if(k=='fim')h='<h2>'+over+'</h2><button class="big" data-a="nw">▶ Nova Partida</button>';
-  else if(k=='menu')h='<h2>Menu</h2>'+[['m','c','Jogar'],['m','a','Aprender'],['s','est','Estatísticas'],['s','cfg','Configurações'],['s','sob','Sobre']].map(x=>'<button class="mi" data-'+x[0]+'="'+x[1]+'">'+x[2]+'</button>').join('');
+  const rw=a=>'<div class="rw">'+a.join('')+'</div>';
+  const bt=(on,at,t)=>'<button class="'+(on?'p':'')+'" '+at+'>'+t+'</button>';
+  if(k=='fim')h='<h2>'+over+'</h2><button class="big" data-a="nw">▶ Nova Partida</button><button class="sec" data-a="pgn" data-v="cur">⬇ Exportar PGN</button><button class="sec" data-a="rev" data-v="cur">⏪ Rever partida</button>';
+  else if(k=='menu')h='<h2>Menu</h2>'+[['m','c','Jogar'],['m','a','Aprender'],['a','free','Análise livre'],['s','est','Estatísticas'],['s','cfg','Configurações'],['s','sob','Sobre']].map(x=>'<button class="mi" data-'+x[0]+'="'+x[1]+'">'+x[2]+'</button>').join('');
   else if(k=='est'){
-    const c=[['Partidas',ST.n],['Vitórias',ST.w],['Empates',ST.d],['Derrotas',ST.l],['Lances analisados',ST.a],['Lances bons',ST.a?Math.round(ST.ok/ST.a*100)+'%':'—'],['Lições guardadas',lessons()],['Geração do cérebro',WJ?WJ.gen:'—']];
-    h='<h2>Estatísticas</h2><div class="sg">'+c.map(x=>'<div><b>'+x[1]+'</b><span>'+x[0]+'</span></div>').join('')+'</div>';
+    const c=[['Partidas',ST.n],['Vitórias',ST.w],['Empates',ST.d],['Derrotas',ST.l],['Lances analisados',ST.a],['Lances bons',ST.a?Math.round(ST.ok/ST.a*100)+'%':'—'],['Lições guardadas',lessons()],['Geração do cérebro',WJ?WJ.gen:'—'],['Rating local',ST.elo]];
+    const rl=r=>r=='1-0'?'Brancas venceram':r=='0-1'?'Pretas venceram':r=='1/2-1/2'?'Empate':'—';
+    h='<h2>Estatísticas</h2><div class="sg">'+c.map(x=>'<div><b>'+x[1]+'</b><span>'+x[0]+'</span></div>').join('')+'</div><p>O rating local é uma estimativa simples contra os níveis do Xeque, não um Elo oficial.</p><h3>Partidas recentes</h3>'+(HIST.slice(0,10).map((x,i)=>'<div class="hl"><span>'+new Date(x.t).toLocaleDateString('pt-BR')+' · '+rl(x.r)+' · '+x.m.length+' lances</span><button data-a="rev" data-v="'+i+'">Rever</button><button data-a="pgn" data-v="'+i+'">PGN</button></div>').join('')||'<p>Nenhuma partida guardada ainda.</p>')+'<button class="sec" data-a="imp">⬆ Importar PGN</button>';
   }
-  else if(k=='cfg')h='<h2>Configurações</h2><p>Jogar com</p><div class="rw"><button class="'+(sideV==0?'p':'')+'" data-a="side" data-v="0">Brancas</button><button class="'+(sideV==1?'p':'')+'" data-a="side" data-v="1">Pretas</button></div><div class="rw"><button data-a="fl">Virar tabuleiro</button></div>';
+  else if(k=='cfg'){
+    const lv=LV[CFG.lv],op=[['x','Xeque'],['s','Stockfish'],['xs','Xeque × Stockfish'],['sx','Stockfish × Xeque']];
+    h='<h2>Configurações</h2><p>Adversário</p>'+
+      rw(op.slice(0,2).map(o=>bt(CFG.opp==o[0],'data-a="cf" data-k="opp" data-v="'+o[0]+'"',o[1])))+
+      rw(op.slice(2).map(o=>bt(CFG.opp==o[0],'data-a="cf" data-k="opp" data-v="'+o[0]+'"',o[1])))+
+      '<p>Jogar com</p>'+rw([bt(sideV==0,'data-a="side" data-v="0"','Brancas'),bt(sideV==1,'data-a="side" data-v="1"','Pretas')])+
+      '<p>Nível</p>'+rw(['<button data-a="lv" data-v="-1">−</button>','<button class="p" style="flex:3">'+(CFG.lv+1)+'/9 · '+lv.n+'</button>','<button data-a="lv" data-v="1">+</button>'])+
+      '<p>Tempo</p>'+rw(TIMES.slice(0,3).map(t=>bt(CFG.tb==t[1]&&CFG.ti==t[2],'data-a="tm" data-b="'+t[1]+'" data-i="'+t[2]+'"',t[0])))+
+      rw(TIMES.slice(3).map(t=>bt(CFG.tb==t[1]&&CFG.ti==t[2],'data-a="tm" data-b="'+t[1]+'" data-i="'+t[2]+'"',t[0])).concat([bt(!TIMES.some(t=>CFG.tb==t[1]&&CFG.ti==t[2]),'data-a="cust"','Outro'+(TIMES.some(t=>CFG.tb==t[1]&&CFG.ti==t[2])?'':' '+(CFG.tb/60)+'+'+CFG.ti))]))+
+      '<p>Tema do tabuleiro</p><div class="sw">'+Object.keys(THEMES).map(t=>'<button class="'+(CFG.th==t?'p':'')+'" style="--a:'+THEMES[t][0]+';--b:'+THEMES[t][1]+'" data-a="th" data-v="'+t+'" title="'+THEMES[t][2]+'"></button>').join('')+'</div>'+
+      '<p>Sons e animações</p>'+rw([bt(CFG.snd,'data-a="snd"','Sons: '+(CFG.snd?'ligados':'desligados')),bt(CFG.an,'data-a="an"','Animações: '+(CFG.an?'ligadas':'desligadas'))])+
+      rw(['<button data-a="fl">Virar tabuleiro</button>','<button data-s="fen">Posição FEN</button>'])+
+      '<button class="big" data-a="go">▶ Nova partida com estas opções</button>';
+  }
+  else if(k=='fen')h='<h2>Posição personalizada</h2><p>Cole uma posição em FEN para jogar a partir dela.</p><textarea id="fen" spellcheck="false">'+X.fen()+'</textarea><div class="er" id="fer"></div>'+PRE.map((x,i)=>'<button class="sec" data-a="fenp" data-v="'+i+'">'+x[0]+'</button>').join('')+'<button class="big" data-a="fenok">▶ Jogar desta posição</button><button class="sec" data-a="fenstd">Posição inicial padrão</button>';
   else h='<h2>Sobre</h2><p>Xeque Chess é uma IA de xadrez que roda inteira no navegador, com o Stockfish supervisionando os lances.</p><p>Feito por Davi Ch. · Discord: 777.imt</p><p>Stockfish: projeto independente, sob GPL v3.</p>';
   $('sc').innerHTML=h+'<button class="sec" data-a="cl">Fechar</button>';
   $('sh').classList.add('on');
@@ -612,12 +822,46 @@ document.addEventListener('click',e=>{
   else if(d.a=='nw')nw();
   else if(d.a=='un')takeback();
   else if(d.a=='ht')hint();
-  else if(d.a=='nx'){hintSq=null;hintLvl=0;clearFb();render();}
+  else if(d.a=='nx'){
+    hintSq=null;hintLvl=0;
+    if(busy)setMsg('Aguarde','O computador está jogando.');
+    else{clearFb();if(isH())startBg();setMsg('Sua vez','Faça o próximo lance. Toque em Dica se precisar.');}
+    render();
+  }
   else if(d.a=='fl'){flip=!flip;closeSh();render();}
-  else if(d.a=='side'){sideV=+d.v;closeSh();nw();}
+  else if(d.a=='side'){sideV=+d.v;CFG.side=sideV;saveCfg();openSh('cfg');}
   else if(d.a=='cl')closeSh();
+  else if(d.a=='free'){closeSh();setMode('a',true);}
+  else if(d.a=='cf'){CFG[d.k]=d.v;saveCfg();openSh('cfg');}
+  else if(d.a=='lv'){CFG.lv=Math.max(0,Math.min(LV.length-1,CFG.lv+ +d.v));saveCfg();openSh('cfg');}
+  else if(d.a=='tm'){CFG.tb=+d.b;CFG.ti=+d.i;saveCfg();openSh('cfg');}
+  else if(d.a=='cust'){
+    const m=parseFloat(prompt('Tempo por jogador (minutos):',CFG.tb?CFG.tb/60:15)),i=parseFloat(prompt('Incremento por lance (segundos):',CFG.ti||0));
+    if(m>=0.5&&m<=180&&i>=0&&i<=60){CFG.tb=Math.round(m*60);CFG.ti=Math.round(i);saveCfg();}
+    openSh('cfg');
+  }
+  else if(d.a=='th'){CFG.th=d.v;applyTheme();saveCfg();openSh('cfg');}
+  else if(d.a=='snd'){CFG.snd=!CFG.snd;saveCfg();openSh('cfg');snd('mv');}
+  else if(d.a=='an'){CFG.an=!CFG.an;saveCfg();openSh('cfg');}
+  else if(d.a=='go')nw();
+  else if(d.a=='fenp'){$('fen').value=PRE[+d.v][1];$('fer').textContent='';}
+  else if(d.a=='fenok'){
+    const v=U.validFen(X,$('fen').value);sync();
+    if(!v){$('fer').textContent='FEN inválido. Confira as 6 partes e os reis.';return;}
+    base=v;nw();
+  }
+  else if(d.a=='fenstd'){base=X.START;nw();}
+  else if(d.a=='pgn')dlPgn(d.v=='cur'?curH():HIST[+d.v]);
+  else if(d.a=='rev'){openRv(d.v=='cur'?curH():HIST[+d.v]);}
+  else if(d.a=='imp')$('pgf').click();
+  else if(d.a=='rv0')rvGo(-9);
+  else if(d.a=='rv1')rvGo(-1);
+  else if(d.a=='rv2')rvGo(1);
+  else if(d.a=='rv3')rvGo(9);
+  else if(d.a=='rvx')rvExit();
 });
 $('tip').textContent=TIPS[Math.floor(Date.now()/864e5)%TIPS.length];
+applyTheme();
 updPg();
 nw();
 </script>

@@ -21,11 +21,23 @@ Sem exagero: o Xeque não é a melhor IA do mundo. O Stockfish é muito mais for
 
 1. **Versão em C++.** O primeiro motor foi escrito em C++ (tabuleiro com bitboards, busca alpha-beta, tabela de transposição, poda por lance nulo, redução de lances tardios, SEE, UCI). A geração de lances foi validada em 6 posições padrão de teste (perft). Em partidas rápidas contra o Stockfish com força limitada, ele ficou em torno de 2700 na escala do Stockfish limitado (estimativa grosseira, não é Elo oficial). Essa versão ainda não está neste repositório.
 2. **Versão para navegador.** Como o C++ não roda direto numa página, o motor foi reescrito em JavaScript (`engine.js`): tabuleiro 0x88, busca PVS com aprofundamento iterativo, tabela de transposição, poda, buscas de quiescência e uma avaliação feita à mão (valor das peças, posição das peças, mobilidade, par de bispos, peões dobrados/isolados/passados, torres em colunas abertas, proteção do rei). Estimativa: cerca de 2200 contra o Stockfish limitado a 2200, em partidas rápidas.
-3. **Interface.** HTML puro, feito pra celular: toque na peça e na casa de destino. O roque funciona tocando no rei e na torre. A IA joga sempre no nível máximo.
+3. **Interface.** HTML puro, feito pra celular: toque na peça e na casa de destino. O roque funciona tocando no rei e na torre. A IA tem 9 níveis de dificuldade, do Principiante ao Impossível (nível máximo).
 4. **Dois cérebros.** O Xeque é o cérebro principal e o Stockfish confere os lances dele (veja abaixo).
 5. **Treino automático.** Um workflow do GitHub Actions treina a avaliação do Xeque o tempo todo, mesmo sem ninguém no site.
 
 Testes feitos: perft nas 6 posições padrão; comparação dos lances legais com o python-chess em 57 mil posições de partidas aleatórias (zero divergências); problemas táticos; partidas contra o Stockfish limitado.
+
+### Novidades
+
+- **Níveis:** 9 níveis de dificuldade (profundidade, tempo de pensamento e aleatoriedade controlada). No Impossível, o Xeque joga com a supervisão do Stockfish.
+- **Relógio:** 3, 5 e 10 minutos, 3+2, 5+3 e tempo personalizado, com incremento. A partida termina quando o tempo acaba.
+- **Adversários:** Xeque, Stockfish (com o Xeque supervisionando e comentando), Xeque × Stockfish e Stockfish × Xeque.
+- **Análise livre:** sem adversário, com avaliação e análise de cada lance.
+- **Posição personalizada:** partidas a partir de qualquer FEN.
+- **Histórico:** as últimas 60 partidas ficam guardadas no aparelho, com revisão lance a lance e exportação em PGN. Também dá para importar PGN.
+- **Rating local:** estimativa simples contra os níveis do Xeque (não é Elo oficial).
+- **Interface:** sons (liga/desliga), animação dos lances e 5 temas de tabuleiro.
+- **Testes:** `node --test tests/*.test.js` roda perft nas 6 posições padrão, testes do motor e do PGN/FEN. O workflow `testes.yml` roda isso a cada alteração.
 
 ### Como ele joga
 
@@ -78,6 +90,8 @@ Ideias, sem promessa de prazo:
 
 - `index.html`: interface
 - `engine.js`: motor do Xeque
+- `chess-util.js`: SAN, validação de FEN e leitura/escrita de PGN
+- `tests/`: testes automatizados
 - `weights.json`: pesos treinados (geração atual)
 - `treino/`: scripts de treino (`gen.js`, `label.js`, `tune.js`, `match.py`, `rodada.js`) e `historico.json`
 - `uci.js`: liga o Xeque em interfaces UCI (Arena, Cute Chess, Lichess-bot) com `node uci.js`
@@ -105,11 +119,23 @@ To be clear: Xeque is not the best chess AI in the world. Stockfish is far stron
 
 1. **C++ version.** The first engine was written in C++ (bitboards, alpha-beta search, transposition table, null-move pruning, late-move reductions, SEE, UCI). Move generation was validated on 6 standard test positions (perft). In fast games against strength-limited Stockfish it scored around 2700 on the limited-Stockfish scale (a rough estimate, not an official Elo). This version is not in this repository yet.
 2. **Browser version.** Since C++ does not run directly in a web page, the engine was rewritten in JavaScript (`engine.js`): 0x88 board, PVS search with iterative deepening, transposition table, pruning, quiescence search and a hand-written evaluation (piece values, piece placement, mobility, bishop pair, doubled/isolated/passed pawns, rooks on open files, king shelter). Estimate: about 2200 against Stockfish limited to 2200, in fast games.
-3. **Interface.** Plain HTML, built for phones: tap a piece, then tap the target square. Castling works by tapping the king and the rook. The AI always plays at its maximum level.
+3. **Interface.** Plain HTML, built for phones: tap a piece, then tap the target square. Castling works by tapping the king and the rook. The AI has 9 difficulty levels, from Beginner to Impossible (maximum strength).
 4. **Two brains.** Xeque is the main brain and Stockfish checks its moves (see below).
 5. **Automatic training.** A GitHub Actions workflow keeps training Xeque's evaluation, even when nobody is on the site.
 
 Tests run: perft on the 6 standard positions; legal moves compared with python-chess on 57 thousand positions from random games (zero mismatches); tactical puzzles; games against strength-limited Stockfish.
+
+### What's new
+
+- **Levels:** 9 difficulty levels (search depth, thinking time and controlled randomness). At Impossible, Xeque plays supervised by Stockfish.
+- **Clock:** 3, 5 and 10 minutes, 3+2, 5+3 and custom time, with increment. The game ends when time runs out.
+- **Opponents:** Xeque, Stockfish (with Xeque supervising and commenting), Xeque vs Stockfish and Stockfish vs Xeque.
+- **Free analysis:** no opponent, with evaluation and analysis of each move.
+- **Custom position:** games from any FEN.
+- **History:** the last 60 games are stored on the device, with move-by-move review and PGN export. PGN import works too.
+- **Local rating:** a simple estimate against Xeque's levels (not an official Elo).
+- **Interface:** sounds (on/off), move animations and 5 board themes.
+- **Tests:** `node --test tests/*.test.js` runs perft on the 6 standard positions, engine tests and PGN/FEN tests. The `testes.yml` workflow runs it on every change.
 
 ### How it plays
 
