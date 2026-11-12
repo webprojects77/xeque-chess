@@ -166,5 +166,19 @@
    "score": 0.37
   },
   "aceito": false
+ },
+ {
+  "quando": "2026-11-12T02:14:20.752Z",
+  "geracao": 0,
+  "posicoes": 80000,
+  "erroAntes": 0.00984,
+  "erroDepois": 0.00893,
+  "partidas": {
+   "v": 63,
+   "e": 45,
+   "d": 92,
+   "score": 0.4275
+  },
+  "aceito": false
  }
 ]
