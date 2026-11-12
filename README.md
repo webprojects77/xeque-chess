@@ -29,15 +29,16 @@ Testes feitos: perft nas 6 posições padrão; comparação dos lances legais co
 
 ### Novidades
 
-- **Níveis:** 9 níveis de dificuldade (profundidade, tempo de pensamento e aleatoriedade controlada). No Impossível, o Xeque joga com a supervisão do Stockfish.
-- **Relógio:** 3, 5 e 10 minutos, 3+2, 5+3 e tempo personalizado, com incremento. A partida termina quando o tempo acaba.
-- **Adversários:** Xeque, Stockfish (com o Xeque supervisionando e comentando), Xeque × Stockfish e Stockfish × Xeque.
-- **Análise livre:** sem adversário, com avaliação e análise de cada lance.
+- **Abas:** Jogar, Aprender, Exercícios e Mais. Tudo que antes estava espalhado agora tem um lugar só.
+- **Nova partida:** uma única tela para escolher cor, dificuldade e relógio.
+- **Dificuldade de verdade:** 9 níveis. Nos mais fáceis o Xeque erra como um iniciante (deixa peças penduradas e perde lances táticos); nos mais altos ele joga com toda a força, e no Impossível o Stockfish supervisiona.
+- **Relógio:** 3, 5 e 10 minutos, 3+2, 5+3 e tempo personalizado, com incremento.
+- **Aprender:** jogar com ajuda do Xeque (nota e explicação de cada lance), análise livre e ver aberturas, em que o Xeque e o Stockfish jogam e o app explica a abertura.
+- **Exercícios:** mate em 1, 2 e 3, táticas e "aproveite o erro", com progresso e recomendação do que treinar.
+- **Histórico:** guarda as últimas 60 partidas e as que você marcar com estrela nunca saem. Dá para rever lance a lance, pedir comentários do Xeque, exportar e importar PGN e fazer backup.
 - **Posição personalizada:** partidas a partir de qualquer FEN.
-- **Histórico:** as últimas 60 partidas ficam guardadas no aparelho, com revisão lance a lance e exportação em PGN. Também dá para importar PGN.
-- **Rating local:** estimativa simples contra os níveis do Xeque (não é Elo oficial).
-- **Interface:** sons (liga/desliga), animação dos lances e 5 temas de tabuleiro.
-- **Testes:** `node --test tests/*.test.js` roda perft nas 6 posições padrão, testes do motor e do PGN/FEN. O workflow `testes.yml` roda isso a cada alteração.
+- **Interface:** peças novas, sons, animação dos lances e 5 temas de tabuleiro.
+- **Testes:** `node --test tests/*.test.js` roda perft nas 6 posições padrão, testes do motor, dos níveis, das aberturas e do PGN/FEN. O workflow `testes.yml` roda isso a cada alteração.
 
 ### Como ele joga
 
@@ -90,7 +91,10 @@ Ideias, sem promessa de prazo:
 
 - `index.html`: interface
 - `engine.js`: motor do Xeque
-- `chess-util.js`: SAN, validação de FEN e leitura/escrita de PGN
+- `chess-util.js`: SAN, validação de FEN, PGN e busca de mates
+- `levels.js`: os 9 níveis de dificuldade
+- `aberturas.js`: livro de aberturas usado na demonstração
+- `exercicios.json`: exercícios gerados por `treino/exercicios.js`
 - `tests/`: testes automatizados
 - `weights.json`: pesos treinados (geração atual)
 - `treino/`: scripts de treino (`gen.js`, `label.js`, `tune.js`, `match.py`, `rodada.js`) e `historico.json`
@@ -127,15 +131,16 @@ Tests run: perft on the 6 standard positions; legal moves compared with python-c
 
 ### What's new
 
-- **Levels:** 9 difficulty levels (search depth, thinking time and controlled randomness). At Impossible, Xeque plays supervised by Stockfish.
-- **Clock:** 3, 5 and 10 minutes, 3+2, 5+3 and custom time, with increment. The game ends when time runs out.
-- **Opponents:** Xeque, Stockfish (with Xeque supervising and commenting), Xeque vs Stockfish and Stockfish vs Xeque.
-- **Free analysis:** no opponent, with evaluation and analysis of each move.
+- **Tabs:** Play, Learn, Exercises and More. Everything that was scattered now has one place.
+- **New game:** a single screen to pick color, difficulty and clock.
+- **Real difficulty:** 9 levels. At the easy levels Xeque blunders like a beginner (leaves pieces hanging and misses tactics); at the top it plays at full strength, and at Impossible Stockfish supervises.
+- **Clock:** 3, 5 and 10 minutes, 3+2, 5+3 and custom time, with increment.
+- **Learn:** play with Xeque's help (grade and explanation for every move), free analysis and watch openings, where Xeque and Stockfish play and the app explains the opening.
+- **Exercises:** mate in 1, 2 and 3, tactics and "punish the mistake", with progress and training recommendations.
+- **History:** keeps the last 60 games, and starred games never drop off. Review move by move, ask Xeque for comments, export and import PGN, and back everything up.
 - **Custom position:** games from any FEN.
-- **History:** the last 60 games are stored on the device, with move-by-move review and PGN export. PGN import works too.
-- **Local rating:** a simple estimate against Xeque's levels (not an official Elo).
-- **Interface:** sounds (on/off), move animations and 5 board themes.
-- **Tests:** `node --test tests/*.test.js` runs perft on the 6 standard positions, engine tests and PGN/FEN tests. The `testes.yml` workflow runs it on every change.
+- **Interface:** new pieces, sounds, move animations and 5 board themes.
+- **Tests:** `node --test tests/*.test.js` runs perft on the 6 standard positions plus engine, level, opening and PGN/FEN tests. The `testes.yml` workflow runs it on every change.
 
 ### How it plays
 

@@ -343,20 +343,25 @@ function perft(d,p){
   for(let i=o;i<k;i++){const m=MV[i];make(m);if(!attacked(kg[side^1],side))c+=d==1?1:perft(d-1,p+1);unmake();}
   return c;
 }
-function think(ms,maxD,temp,cb,ex){
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function think(ms,maxD,temp,cb,ex,rnd){
   nodes=0;stop=false;const t0=Date.now();tEnd=t0+ms;rootBest=0;K1.fill(0);K2.fill(0);
   const all=legal();if(!all.length)return 0;
   rootEx=(ex||[]).map(parse).filter(Boolean);
   let mv=all.filter(m=>rootEx.indexOf(m)<0);
   if(!mv.length){rootEx=[];mv=all;}
   rootBest=mv[0];if(mv.length==1)return mv[0];
-  if(temp>0){
+  if(temp>0||rnd>0){
     tEnd=t0+1e9;
+    if(rnd>0&&Math.random()<rnd){
+      if(cb)cb({d:0,v:0,nodes:0,ms:Date.now()-t0});
+      return mv[Math.floor(Math.random()*mv.length)];
+    }
     const sc=mv.map(m=>{make(m);const v=-ab(-INF,INF,Math.max(0,maxD-1),1,1);unmake();return v;});
-    const mx=Math.max(...sc),w=sc.map(v=>Math.exp((v-mx)/temp));
-    let r=Math.random()*w.reduce((a,x)=>a+x,0);
-    for(let i=0;i<mv.length;i++){r-=w[i];if(r<=0){if(cb)cb({d:maxD,v:sc[i],nodes,ms:Date.now()-t0});return mv[i];}}
-    return mv[0];
+    let bi=0,bv=-Infinity;
+    for(let i=0;i<mv.length;i++){const q=Math.abs(sc[i])>MATE-200?sc[i]:sc[i]+gauss()*temp;if(q>bv){bv=q;bi=i;}}
+    if(cb)cb({d:maxD,v:sc[bi],nodes,ms:Date.now()-t0});
+    return mv[bi];
   }
   let bm=rootBest;
   for(let d=1;d<=maxD;d++){
@@ -386,7 +391,7 @@ if(typeof WorkerGlobalScope!=='undefined'&&typeof self!=='undefined'&&self insta
     if(d.reset){reset();return;}
     if(d.weights){setWeights(d.weights);return;}
     setup(d.fen,d.moves);
-    const m=think(d.ms,d.depth,d.temp,i=>postMessage({info:i}),d.ex);
+    const m=think(d.ms,d.depth,d.temp,i=>postMessage({info:i}),d.ex,d.rnd);
     postMessage({best:uci(m)});
   };
 }

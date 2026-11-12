@@ -77,6 +77,46 @@ function pgnOf(X,h){
   return tags.join('\n')+'\n\n'+mv.join(' ')+(mv.length?' ':'')+R+'\n';
 }
 
-G.XUtil={sqn,san,validFen,parsePgn,pgnOf};
+
+function canMate(X,n){
+  for(const m of X.legal()){
+    X.make(m);
+    const r=X.legal();
+    let ok=false;
+    if(!r.length)ok=X.inCheck();
+    else if(n>1){ok=true;for(const q of r){X.make(q);const c=canMate(X,n-1);X.unmake();if(!c){ok=false;break;}}}
+    X.unmake();
+    if(ok)return true;
+  }
+  return false;
+}
+
+function mates(X,n){
+  const out=[];
+  for(const m of X.legal()){
+    X.make(m);
+    const r=X.legal();
+    let ok=false;
+    if(!r.length)ok=X.inCheck();
+    else if(n>1){ok=true;for(const q of r){X.make(q);const c=canMate(X,n-1);X.unmake();if(!c){ok=false;break;}}}
+    X.unmake();
+    if(ok)out.push(m);
+  }
+  return out;
+}
+
+function defense(X,k){
+  let best=0,bl=-1;
+  for(const q of X.legal()){
+    X.make(q);
+    let l=1;
+    while(l<k&&!canMate(X,l))l++;
+    X.unmake();
+    if(l>bl||(l==bl&&Math.random()<.5)){bl=l;best=q;}
+  }
+  return best;
+}
+
+G.XUtil={sqn,san,validFen,parsePgn,pgnOf,canMate,mates,defense};
 if(typeof module!=='undefined')module.exports=G.XUtil;
 })(globalThis);
