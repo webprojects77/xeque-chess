@@ -1,0 +1,58 @@
+# Arquitetura do Xeque Chess
+
+O projeto roda inteiro no navegador. Não há backend: o GitHub Pages só serve os arquivos.
+
+## Arquivos
+
+| Arquivo | Função |
+| --- | --- |
+| `index.html` | Interface, estado da partida, relógio, sons, modos e telas |
+| `engine.js` | Motor do Xeque: geração de lances, busca alfa-beta, avaliação, perft e fraqueza controlada |
+| `levels.js` | Os 9 níveis (profundidade, ruído, chance de lance aleatório, tempo) |
+| `aberturas.js` | Livro de aberturas usado na demonstração |
+| `chess-util.js` | SAN, validação de FEN, PGN e busca exaustiva de mates |
+| `uci.js` | Camada UCI em volta do motor |
+| `stockfish/` | Stockfish em WebAssembly, usado como supervisor e nas demonstrações |
+| `weights.json` | Pesos de avaliação treinados |
+| `exercicios.json` | Exercícios gerados por `treino/exercicios.js` |
+| `sw.js`, `manifest.webmanifest` | Instalação como app e uso offline |
+| `treino/` | Treino automático dos pesos, gerador de exercícios, calibragem e comparação de versões |
+| `tests/` | Testes automatizados (`npm test`) |
+
+## Fluxo de um lance
+
+1. O clique no tabuleiro vira um lance legal (`X.legal()`), com escolha da peça na promoção.
+2. `humanMove` registra o lance, atualiza relógio, som e animação e, no modo Aprender, pede a análise.
+3. `engineMove` chama `think()`. Nos níveis 1 a 8 só o Xeque joga, com os parâmetros de `levels.js`. No nível 9 o Stockfish supervisiona o lance do Xeque.
+4. `apply` aplica o lance e devolve a vez.
+
+## Como o nível enfraquece o motor
+
+`think(ms, profundidade, ruído, callback, excluir, aleatório)`:
+
+- com probabilidade `aleatório`, joga um lance legal qualquer;
+- senão avalia cada lance na profundidade pedida e soma um ruído gaussiano de desvio `ruído` (em centipeões), escolhendo o melhor resultado;
+- mates encontrados nunca recebem ruído.
+
+## Armazenamento no navegador
+
+| Chave | Conteúdo |
+| --- | --- |
+| `xeque_cfg` | Cor, nível, relógio, tema, sons e animações |
+| `xeque_st` | Estatísticas, rating local e progresso dos exercícios |
+| `xeque_hist` | Histórico de partidas (as com estrela nunca saem) |
+| `xeque_mem` | Lições aprendidas pelo motor |
+| `xeque_log` | Erros registrados para o diagnóstico |
+
+O backup em Mais → Estatísticas exporta e restaura tudo isso num arquivo.
+
+## Como estender
+
+- **Novo nível ou ajuste:** edite `levels.js` e rode `node treino/calibrar.js 8 0 8`.
+- **Nova abertura:** acrescente uma linha em `aberturas.js`. O teste `niveis.test.js` confere se todos os lances são legais.
+- **Novos exercícios:** `node treino/exercicios.js 8` regenera `exercicios.json`. Precisa de um Stockfish nativo (variável `STOCKFISH`).
+- **Comparar versões:** `node treino/comparar.js <commit> <jogos> <ms>`.
+
+## Testes e publicação
+
+`npm test` roda perft, motor, níveis, aberturas, PGN/FEN e um teste de força. O workflow `testes.yml` roda isso a cada alteração no `main` e o `treino.yml` atualiza os pesos a cada 3 horas.

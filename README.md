@@ -37,7 +37,10 @@ Testes feitos: perft nas 6 posições padrão; comparação dos lances legais co
 - **Exercícios:** mate em 1, 2 e 3, táticas e "aproveite o erro", com progresso e recomendação do que treinar.
 - **Histórico:** guarda as últimas 60 partidas e as que você marcar com estrela nunca saem. Dá para rever lance a lance, pedir comentários do Xeque, exportar e importar PGN e fazer backup.
 - **Posição personalizada:** partidas a partir de qualquer FEN.
-- **Interface:** peças novas, sons, animação dos lances e 5 temas de tabuleiro.
+- **Interface:** peças novas, sons, animação dos lances, 5 temas de tabuleiro e escolha da peça na promoção.
+- **App:** dá para instalar na tela inicial e abrir sem internet depois do primeiro acesso.
+- **Acessibilidade:** o tabuleiro funciona pelo teclado (setas, Enter) e leitores de tela anunciam cada casa e cada mensagem.
+- **Diagnóstico:** em Mais, uma tela com versão e erros registrados, para mandar quando algo quebrar.
 - **Testes:** `node --test tests/*.test.js` roda perft nas 6 posições padrão, testes do motor, dos níveis, das aberturas e do PGN/FEN. O workflow `testes.yml` roda isso a cada alteração.
 
 ### Como ele joga
@@ -96,6 +99,9 @@ Ideias, sem promessa de prazo:
 - `aberturas.js`: livro de aberturas usado na demonstração
 - `exercicios.json`: exercícios gerados por `treino/exercicios.js`
 - `tests/`: testes automatizados
+- `sw.js` e `manifest.webmanifest`: instalação como app e uso offline
+- `treino/comparar.js`: joga a versão atual contra uma versão antiga (`node treino/comparar.js HEAD~10 20`)
+- `docs/ARQUITETURA.md`: como o projeto é organizado
 - `weights.json`: pesos treinados (geração atual)
 - `treino/`: scripts de treino (`gen.js`, `label.js`, `tune.js`, `match.py`, `rodada.js`) e `historico.json`
 - `uci.js`: liga o Xeque em interfaces UCI (Arena, Cute Chess, Lichess-bot) com `node uci.js`
@@ -139,7 +145,10 @@ Tests run: perft on the 6 standard positions; legal moves compared with python-c
 - **Exercises:** mate in 1, 2 and 3, tactics and "punish the mistake", with progress and training recommendations.
 - **History:** keeps the last 60 games, and starred games never drop off. Review move by move, ask Xeque for comments, export and import PGN, and back everything up.
 - **Custom position:** games from any FEN.
-- **Interface:** new pieces, sounds, move animations and 5 board themes.
+- **Interface:** new pieces, sounds, move animations, 5 board themes and a promotion piece picker.
+- **App:** installable to the home screen, works offline after the first visit.
+- **Accessibility:** the board works from the keyboard (arrows, Enter) and screen readers announce every square and message.
+- **Diagnostics:** a screen under More with the version and logged errors, to send along when something breaks.
 - **Tests:** `node --test tests/*.test.js` runs perft on the 6 standard positions plus engine, level, opening and PGN/FEN tests. The `testes.yml` workflow runs it on every change.
 
 ### How it plays

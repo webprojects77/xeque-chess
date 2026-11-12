@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Xeque Chess</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0d0e1f">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root{--l:#f2dab8;--d:#b98862;--bg:#0d0e1f;--pn:#171936;--ln:#2b2e5c;--ac:#6f5ff0;--tx:#eef0fe;--mu:#9b9ec4}
 body{--bs:min(92vw,520px);--lw:0px}
@@ -119,6 +122,10 @@ body.rv #bb{display:none}
 .hl button{padding:6px 10px;border-radius:8px;background:#222550;border:1px solid var(--ln);font-size:12px}
 textarea{width:100%;min-height:70px;border-radius:10px;border:1px solid var(--ln);background:#12142e;color:var(--tx);padding:10px;font:13px monospace}
 .er{color:#ff8a8a;font-size:13px;min-height:18px}
+.pp{display:flex;gap:10px}
+.pp button{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:12px;background:#222550;border:1px solid var(--ln);font-size:13px}
+.pp .pc{width:52px;height:52px;pointer-events:none}
+.s:focus-visible{outline:3px solid #fff;outline-offset:-3px;z-index:2}
 .mi.p{background:linear-gradient(180deg,#8174f8,#6a5cf0);border-color:transparent}
 #pp{display:none}
 @media (max-width:999px) and (orientation:landscape){body{--bs:min(calc(100vh - 150px),58vw)}}
@@ -189,12 +196,12 @@ textarea{width:100%;min-height:70px;border-radius:10px;border:1px solid var(--ln
 <div class="card pr"><h4>Seu progresso</h4><div class="rw2"><span class="pgn"></span><span class="pgp"></span></div><div class="pbar"><i class="pgb"></i></div></div>
 </aside>
 <section id="ct">
-<div id="mb"><div class="fbi">💡</div><div><div class="fbt"></div><div class="fbd"></div></div></div>
+<div id="mb" role="status" aria-live="polite"><div class="fbi">💡</div><div><div class="fbt"></div><div class="fbd"></div></div></div>
 <div class="ck" id="ckT"></div>
 <div id="bw"><div id="rk"></div><div id="bd"></div><div></div><div id="fl2"></div></div>
 <div class="ck" id="ckB"></div>
 <div id="rvb"><button data-a="rv0">⏮</button><button data-a="rv1">◀</button><button data-a="rv2">▶</button><button data-a="rv3">⏭</button><button data-a="rvc">🧠</button><button data-a="rvx">✕ Sair</button></div>
-<div id="st"></div>
+<div id="st" aria-live="polite"></div>
 <button id="cfl" data-s="novo" hidden></button>
 <div class="card mev"><div class="evh"><span>Avaliação</span><span class="evv">0.00</span></div><div class="evb"><i></i></div></div>
 </section>
@@ -259,6 +266,16 @@ const TT=['Lance muito fraco','Lance fraco','Dá pra melhorar','Boa jogada!','Ó
 const TIPS=['Controlar o centro do tabuleiro é uma ótima estratégia.','Desenvolva cavalos e bispos antes de sair com a dama.','Role cedo: o rei fica mais seguro e a torre entra no jogo.','Evite mover a mesma peça duas vezes na abertura.','Antes de cada lance, confira se alguma peça sua ficou sem defesa.','Troque peças quando estiver na frente em material.','Torres rendem mais em colunas abertas.'];
 const $=id=>document.getElementById(id);
 const all=s=>document.querySelectorAll(s);
+const VER='2026-11-12';
+let LOG=[];
+try{LOG=JSON.parse(localStorage.getItem('xeque_log')||'[]');}catch(e){LOG=[];}
+function logErr(m){
+  LOG.push({t:Date.now(),m:String(m).slice(0,300)});
+  if(LOG.length>30)LOG.shift();
+  try{localStorage.setItem('xeque_log',JSON.stringify(LOG));}catch(e){}
+}
+window.addEventListener('error',e=>logErr((e.message||'erro')+' @'+String(e.filename||'').split('/').pop()+':'+(e.lineno||0)));
+window.addEventListener('unhandledrejection',e=>logErr('promessa: '+(e.reason&&e.reason.message||e.reason)));
 let moves=[],sans=[],rat=[],human=0,sideV=0,flip=false,sel=-1,busy=false,busyMsg='Pensando…',over='',last=[-1,-1],hintSq=null,hintLvl=0,hintKey='',mode='c',bg=null,bgP=null,gid=0,jid=0,w=null,sf=null,sfOk=null,sfCb=null,sfCur=null,sfBusy=false,sfq=[],MEM={},WJ=null,counted=false,ST={n:0,w:0,l:0,d:0,a:0,ok:0,elo:1000,px:{},pd:[],ps:0};
 try{MEM=JSON.parse(localStorage.getItem('xeque_mem')||'{}');}catch(e){MEM={};}
 try{ST=Object.assign(ST,JSON.parse(localStorage.getItem('xeque_st')||'{}'));}catch(e){}
@@ -274,7 +291,7 @@ let HIST=[];
 try{HIST=JSON.parse(localStorage.getItem('xeque_hist')||'[]');}catch(e){HIST=[];}
 const saveCfg=()=>{try{localStorage.setItem('xeque_cfg',JSON.stringify(CFG));}catch(e){}};
 const saveHist=()=>{try{localStorage.setItem('xeque_hist',JSON.stringify(HIST));}catch(e){}};
-let PZ=null,PZD=null,PZB=null,RC=[],RCb=false,rvm='c',OPS={seed:null,paused:false},GA={a:0,ok:0},shK='',shX='';
+let PM=null,fq=20,kbd=false,PZ=null,PZD=null,PZB=null,RC=[],RCb=false,rvm='c',OPS={seed:null,paused:false},GA={a:0,ok:0},shK='',shX='';
 let players=['h','x'],free=false,auto=false,base=X.START,clk=null,anim=null,res='*',rv=null,rvi=0,rvb=null,AC=null;
 
 function learn(k,g,b){
@@ -287,9 +304,9 @@ function learn(k,g,b){
 }
 const lessons=()=>Object.keys(MEM).length;
 
-function mk(){try{w=new Worker('engine.js?v=8');w.onerror=()=>{w=null;$('i1').textContent='Xeque rodando sem processo separado.';};if(WJ)w.postMessage({weights:WJ.v});}catch(e){w=null;}}
+function mk(){try{w=new Worker('engine.js?v=8');w.onerror=()=>{w=null;$('i1').textContent='Xeque rodando sem processo separado.';logErr('worker do Xeque falhou');};if(WJ)w.postMessage({weights:WJ.v});}catch(e){w=null;}}
 mk();
-const wp=(typeof fetch=='function'?fetch('weights.json?'+Date.now()):Promise.reject()).then(r=>r.json()).then(j=>{WJ=j;X.setWeights(j.v);if(w)w.postMessage({weights:j.v});$('gn').textContent='cérebro: geração '+j.gen;}).catch(()=>{$('gn').textContent='cérebro: padrão (pesos não carregados)';});
+const wp=(typeof fetch=='function'?fetch('weights.json?'+Date.now()):Promise.reject()).then(r=>r.json()).then(j=>{WJ=j;X.setWeights(j.v);if(w)w.postMessage({weights:j.v});$('gn').textContent='cérebro: geração '+j.gen;}).catch(()=>{$('gn').textContent='cérebro: padrão (pesos não carregados)';logErr('weights.json não carregou');});
 
 const fmt=i=>'prof. '+i.d+' · '+(Math.abs(i.v)>=90000?'mate':(i.v/100).toFixed(2));
 const fe=v=>Math.abs(v)>=90000?(v>0?'mate a seu favor':'mate contra você'):(v>0?'+':'')+(v/100).toFixed(1);
@@ -331,7 +348,7 @@ function sfStart(){
     $('i2').textContent='Stockfish: carregando…';
     try{
       sf=new Worker('stockfish/stockfish-19-lite-single.js');
-      sf.onerror=()=>{sf=null;$('i2').textContent='Stockfish indisponível (erro ao carregar).';rej();};
+      sf.onerror=()=>{sf=null;$('i2').textContent='Stockfish indisponível (erro ao carregar).';logErr('Stockfish falhou ao carregar');rej();};
       sf.onmessage=e=>{
         const l=typeof e.data=='string'?e.data:'';
         if(l=='uciok')sf.postMessage('isready');
@@ -537,10 +554,11 @@ function render(){
       if(sq==sel)c+=' sel';
       if(sq==kc)c+=' chk';
       if(tg[sq])c+=p?' cp':' mv';
-      h+='<div class="'+c+'" data-q="'+sq+'">'+(p?'<svg class="pc" viewBox="0 0 45 45"><use href="#'+((p>>3)?'b':'w')+(p&7)+'"/></svg>':'')+'</div>';
+      h+='<div class="'+c+'" data-q="'+sq+'" role="button" tabindex="'+(sq==fq?0:-1)+'" aria-label="'+sqn(sq)+(p?', '+PN[p&7]+((p&7)==4||(p&7)==5?(p>>3?' preta':' branca'):(p>>3?' preto':' branco')):', vazia')+'">'+(p?'<svg class="pc" viewBox="0 0 45 45"><use href="#'+((p>>3)?'b':'w')+(p&7)+'"/></svg>':'')+'</div>';
     }
   }
   $('bd').innerHTML=h;$('rk').innerHTML=rh;$('fl2').innerHTML=fh;
+  if(kbd){const fe=document.querySelector('#bd [data-q="'+fq+'"]');if(fe)fe.focus();}
   const md=mat(human)-mat(human^1);
   document.body.dataset.md=mode;
   $('ml').textContent=mode=='p'?'Exercícios':mode=='o'?'Aberturas':mode=='a'?(free?'Análise livre':'Aprendizado'):'Partida';
@@ -892,12 +910,29 @@ $('bd').onclick=e=>{
       mv=X.legal().filter(m=>(m&127)==k&&(m>>7&127)==dest&&(m>>14&7)==2);
     }
   }
-  if(mv.length){humanMove(mv.find(x=>(x>>17&7)==5)||mv[0]);return;}
+  if(mv.length){
+    if(mv.length>1&&(mv[0]>>17&7)){PM=mv;openSh('promo');return;}
+    humanMove(mv[0]);return;
+  }
   const p=X.at(sq&7,sq>>4);
   const ok=p&&(p>>3)==X.side();
   if(sel>=0&&!ok)snd('bad');
   sel=ok?sq:-1;render();
 };
+$('bd').addEventListener('keydown',e=>{
+  const el=e.target.closest('.s');
+  if(!el)return;
+  if(e.key=='Enter'||e.key==' '){e.preventDefault();kbd=true;fq=+el.dataset.q;$('bd').onclick({target:el});return;}
+  const d={ArrowUp:[0,1],ArrowDown:[0,-1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];
+  if(!d)return;
+  e.preventDefault();kbd=true;
+  const q=+el.dataset.q,f=(q&7)+(flip?-d[0]:d[0]),r=(q>>4)+(flip?-d[1]:d[1]);
+  if(f<0||f>7||r<0||r>7)return;
+  fq=r*16+f;
+  const n=document.querySelector('#bd [data-q="'+fq+'"]');
+  if(n){all('#bd [tabindex="0"]').forEach(x=>x.tabIndex=-1);n.tabIndex=0;n.focus();}
+});
+$('bd').addEventListener('pointerdown',()=>{kbd=false;});
 function nw(){
   if(mode=='p'){mode='c';PZ=null;document.body.classList.remove('pz','a');base=PZB||X.START;}
   if(rvb){base=rvb;rvb=null;mode=rvm;document.body.classList.toggle('a',mode=='a');}
@@ -968,7 +1003,7 @@ function playFromHere(){
   nw();
 }
 function dlBackup(){
-  const t=JSON.stringify({v:1,st:ST,hist:HIST,cfg:CFG});
+  const t=JSON.stringify({v:1,st:ST,hist:HIST,cfg:CFG,mem:MEM});
   try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'application/json'}));a.download='xeque-backup.json';document.body.appendChild(a);a.click();a.remove();}catch(e){}
 }
 function loadBackup(txt){
@@ -979,6 +1014,7 @@ function loadBackup(txt){
   j.hist.forEach(x=>{if(x&&x.m&&!seen.has(x.t)){HIST.push(x);seen.add(x.t);}});
   HIST.sort((a,b)=>b.t-a.t);
   trimHist();saveHist();
+  if(j.mem&&typeof j.mem=='object'){for(const k in j.mem)if(!MEM[k])MEM[k]=j.mem[k];try{localStorage.setItem('xeque_mem',JSON.stringify(MEM));}catch(e){}}
   if(j.st&&j.st.n>ST.n)Object.assign(ST,j.st);
   saveSt();updPg();pzProg();openSh('est');
 }
@@ -994,6 +1030,8 @@ function openSh(k,x){
     '<p>Dificuldade</p><div class="lvl">'+LV.map((l,i)=>'<button class="'+(CFG.lv==i?'p':'')+'" data-a="lv" data-v="'+i+'"><b>'+(i+1)+'. '+l.n+'</b>'+(CFG.lv==i?'<span>'+l.w+'</span>':'')+'</button>').join('')+'</div>'+
     '<p>Relógio</p>'+rw(TIMES.slice(0,3).map(tb))+rw(TIMES.slice(3).map(tb).concat([bt(!TIMES.some(t=>CFG.tb==t[1]&&CFG.ti==t[2]),'data-a="cust"','Outro'+(TIMES.some(t=>CFG.tb==t[1]&&CFG.ti==t[2])?'':': '+tml()))]))+
     '<button class="big" data-a="go">▶ Começar</button>';
+  else if(k=='promo'){const c=X.side()?'b':'w';h='<h2>Promover para</h2><div class="pp">'+[5,4,3,2].map(r=>'<button data-a="pm" data-v="'+r+'"><svg class="pc" viewBox="0 0 45 45"><use href="#'+c+r+'"/></svg><span>'+['','','Cavalo','Bispo','Torre','Dama'][r]+'</span></button>').join('')+'</div>';}
+  else if(k=='dg')h='<h2>Diagnóstico</h2><p>Versão '+VER+' · '+(navigator.onLine?'online':'offline')+' · Stockfish: '+(sf?'carregado':sfOk?'carregando':'não iniciado')+'</p>'+(LOG.length?'<textarea readonly>'+LOG.slice().reverse().map(x=>new Date(x.t).toLocaleString('pt-BR')+' · '+x.m).join('\n').replace(/</g,'&lt;')+'</textarea>':'<p>Nenhum erro registrado.</p>')+'<button class="sec" data-a="dgc">📋 Copiar relatório</button><button class="sec" data-a="dgx">🗑 Limpar</button>';
   else if(k=='ap')h='<h2>Aprender</h2><p>Escolha como você quer aprender.</p>'+
     '<button class="mi" data-a="apl"><b>🎓 Jogar com ajuda</b><span>Jogue contra o Xeque e receba nota e explicação de cada lance.</span></button>'+
     '<button class="mi" data-a="free"><b>🔍 Análise livre</b><span>Mova as peças dos dois lados e veja a avaliação em tempo real.</span></button>'+
@@ -1004,6 +1042,7 @@ function openSh(k,x){
     '<button class="mi" data-s="est"><b>📊 Estatísticas e histórico</b><span>Suas partidas, notas e backup.</span></button>'+
     '<button class="mi" data-s="fen"><b>📌 Posição personalizada</b><span>Jogue a partir de qualquer posição em FEN.</span></button>'+
     '<button class="mi" data-s="aj"><b>⚙ Ajustes</b><span>Sons, animações e tema do tabuleiro.</span></button>'+
+    '<button class="mi" data-s="dg"><b>🛠 Diagnóstico</b><span>Relatório de erros para mandar se algo quebrar.</span></button>'+
     '<button class="mi" data-s="sob"><b>ℹ Sobre</b></button>';
   else if(k=='aj')h='<h2>Ajustes</h2><p>Tema do tabuleiro</p><div class="sw">'+Object.keys(THEMES).map(t=>'<button class="'+(CFG.th==t?'p':'')+'" style="--a:'+THEMES[t][0]+';--b:'+THEMES[t][1]+'" data-a="th" data-v="'+t+'" title="'+THEMES[t][2]+'"></button>').join('')+'</div>'+
     '<p>Sons e animações</p>'+rw([bt(CFG.snd,'data-a="snd"','Sons: '+(CFG.snd?'ligados':'desligados')),bt(CFG.an,'data-a="an"','Animações: '+(CFG.an?'ligadas':'desligadas'))]);
@@ -1076,6 +1115,9 @@ document.addEventListener('click',e=>{
   else if(d.a=='star'){const y=HIST[+d.v];if(y){y.k=y.k?0:1;trimHist();saveHist();openSh(shK,shX);}}
   else if(d.a=='bk')dlBackup();
   else if(d.a=='bi')$('bkf').click();
+  else if(d.a=='pm'){const m=PM&&PM.find(x=>(x>>17&7)==+d.v);closeSh();PM=null;if(m)humanMove(m);}
+  else if(d.a=='dgc'){try{navigator.clipboard.writeText('Xeque '+VER+'\n'+LOG.map(x=>new Date(x.t).toISOString()+' '+x.m).join('\n'));}catch(e){}}
+  else if(d.a=='dgx'){LOG=[];try{localStorage.removeItem('xeque_log');}catch(e){}openSh('dg');}
   else if(d.a=='fenp'){$('fen').value=PRE[+d.v][1];$('fer').textContent='';}
   else if(d.a=='fenok'){
     const v=U.validFen(X,$('fen').value);sync();
@@ -1105,6 +1147,7 @@ $('bkf').onchange=e=>{
   r.readAsText(f);e.target.value='';
 };
 $('tip').textContent=TIPS[Math.floor(Date.now()/864e5)%TIPS.length];
+try{if('serviceWorker' in navigator&&location.protocol.indexOf('http')==0)navigator.serviceWorker.register('sw.js');}catch(e){}
 applyTheme();
 updPg();
 pzProg();
