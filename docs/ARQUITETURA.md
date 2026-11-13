@@ -56,3 +56,14 @@ O backup em Mais → Estatísticas exporta e restaura tudo isso num arquivo.
 ## Testes e publicação
 
 `npm test` roda perft, motor, níveis, aberturas, PGN/FEN e um teste de força. O workflow `testes.yml` roda isso a cada alteração no `main` e o `treino.yml` atualiza os pesos a cada 3 horas.
+
+## Treino automático dos pesos
+
+`treino/rodada.js` roda a cada 3 horas no GitHub Actions:
+
+1. `gen.js` gera posições calmas de partidas do próprio Xeque;
+2. `label.js` rotula cada posição com a avaliação do Stockfish;
+3. `tune.js` ajusta os pesos de avaliação para se aproximarem do Stockfish, com cada peso limitado a 70% a 140% do valor padrão;
+4. `rodada.js` cria dois candidatos (pesos ajustados por inteiro e pela metade do caminho), joga os dois contra os pesos atuais, confirma o melhor com mais partidas e só aceita se o placar combinado for de pelo menos 52%.
+
+Em 15 rodadas seguidas os pesos ajustados jogaram um pouco pior que os atuais, mesmo com o erro de validação caindo cerca de 11%. Ou seja, aproximar a avaliação estática do Stockfish não torna o Xeque mais forte. Ganhos maiores devem vir da busca (poda, extensões, tabela de transposição), não dos pesos.

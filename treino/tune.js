@@ -14,7 +14,7 @@ function loss(set){
   return s/set.length;
 }
 const keys=Object.keys(DEF),st={},lo={},hi={};
-for(const k of keys){st[k]=Math.max(Math.abs(DEF[k])*0.04,0.05);lo[k]=DEF[k]*0.5;hi[k]=DEF[k]*2;}
+for(const k of keys){st[k]=Math.max(Math.abs(DEF[k])*0.04,0.05);const a=DEF[k]*0.7,b=DEF[k]*1.4;lo[k]=Math.min(a,b);hi[k]=Math.max(a,b);}
 const t0=Date.now(),trainA=loss(train),valA=loss(val);
 let best=trainA,rounds=0;
 while(Date.now()-t0<secs*1000){

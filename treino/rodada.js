@@ -21,15 +21,25 @@ async function main(){
   log('ajustando pesos por',SECS,'s');
   const tu=JSON.parse(execFileSync('node',[T+'/tune.js',tmp+'/rot.txt',R+'/weights.json',tmp+'/novo.json',String(SECS)],{encoding:'utf8'}).trim().split('\n').pop());
   log('erro de validacao',tu.valAntes.toFixed(5),'->',tu.valDepois.toFixed(5));
-  let m={v:0,e:0,d:0,score:0.5},aceito=false;
+  let m={v:0,e:0,d:0,score:0.5},aceito=false,escolhido=null;
+  const defs=Object.assign({},require(R+'/engine.js').weights(),cur.v);
+  const novo=JSON.parse(fs.readFileSync(tmp+'/novo.json'));
+  const mix=(t)=>{const o={};for(const k in novo.v)o[k]=+(defs[k]+(novo.v[k]-defs[k])*t).toFixed(3);return o;};
+  const jogar=(f,n)=>JSON.parse(execFileSync('python3',[T+'/match.py',R+'/weights.json',f,String(n),String(MT)],{encoding:'utf8'}).trim().split('\n').pop());
   if(tu.valDepois<tu.valAntes*0.998){
-    log('jogando',MATCH,'partidas: pesos novos x atuais');
-    m=JSON.parse(execFileSync('python3',[T+'/match.py',R+'/weights.json',tmp+'/novo.json',String(MATCH),String(MT)],{encoding:'utf8'}).trim().split('\n').pop());
+    const metade=Math.max(2,Math.ceil(MATCH/2));
+    const cands=[1,0.5].map(t=>{const f=tmp+'/c'+t+'.json';fs.writeFileSync(f,JSON.stringify({gen:cur.gen||0,v:mix(t)}));log('candidato',t,': jogando',metade,'partidas');return{t,f,m:jogar(f,metade)};});
+    cands.sort((x,y)=>y.m.score-x.m.score);
+    const c=cands[0];
+    log('melhor candidato:',c.t,'com',c.m.score.toFixed(3),'| confirmando com',MATCH,'partidas');
+    const k=jogar(c.f,MATCH);
+    m={v:c.m.v+k.v,e:c.m.e+k.e,d:c.m.d+k.d,score:(c.m.score*metade+k.score*MATCH)/(metade+MATCH),alfa:c.t};
     log('placar dos novos:',m.v,'V',m.e,'E',m.d,'D');
-    aceito=m.score>=0.5;
+    aceito=m.score>=0.52;
+    escolhido=c.f;
   }else log('sem melhora na validacao, descartado');
   const gen=(cur.gen||0)+(aceito?1:0);
-  if(aceito){const n=JSON.parse(fs.readFileSync(tmp+'/novo.json'));fs.writeFileSync(R+'/weights.json',JSON.stringify({gen,v:n.v}));}
+  if(aceito){const n=JSON.parse(fs.readFileSync(escolhido));fs.writeFileSync(R+'/weights.json',JSON.stringify({gen,v:n.v}));}
   const hf=T+'/historico.json';
   const h=fs.existsSync(hf)?JSON.parse(fs.readFileSync(hf)):[];
   h.push({quando:new Date().toISOString(),geracao:gen,posicoes:tu.n,erroAntes:+tu.valAntes.toFixed(5),erroDepois:+tu.valDepois.toFixed(5),partidas:m,aceito});
