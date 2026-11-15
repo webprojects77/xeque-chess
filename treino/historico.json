@@ -328,5 +328,20 @@
    "alfa": 1
   },
   "aceito": false
+ },
+ {
+  "quando": "2026-11-15T17:40:26.268Z",
+  "geracao": 3,
+  "posicoes": 80000,
+  "erroAntes": 0.0088,
+  "erroDepois": 0.00868,
+  "partidas": {
+   "v": 120,
+   "e": 76,
+   "d": 104,
+   "score": 0.5266666666666666,
+   "alfa": 1
+  },
+  "aceito": true
  }
 ]
