@@ -443,5 +443,19 @@
    "score": 0.5
   },
   "aceito": false
+ },
+ {
+  "quando": "2026-11-18T21:46:53.298Z",
+  "geracao": 4,
+  "posicoes": 80000,
+  "erroAntes": 0.00868,
+  "erroDepois": 0.00867,
+  "partidas": {
+   "v": 0,
+   "e": 0,
+   "d": 0,
+   "score": 0.5
+  },
+  "aceito": false
  }
 ]
