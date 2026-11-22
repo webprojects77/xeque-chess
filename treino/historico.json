@@ -612,5 +612,19 @@
    "alfa": 1
   },
   "aceito": true
+ },
+ {
+  "quando": "2026-11-22T21:06:02.180Z",
+  "geracao": 5,
+  "posicoes": 80000,
+  "erroAntes": 0.00911,
+  "erroDepois": 0.00911,
+  "partidas": {
+   "v": 0,
+   "e": 0,
+   "d": 0,
+   "score": 0.5
+  },
+  "aceito": false
  }
 ]
